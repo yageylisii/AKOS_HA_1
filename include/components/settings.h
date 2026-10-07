@@ -4,7 +4,7 @@
 
 // ограничения модели: защита от огромных очередей и журналов
 enum {
-    MAX_WIND_INTERVALS = 20,
+    MAX_WIND_INTERVALS = 3,
     MAX_CABINS = 12,
     MAX_CABIN_CAPACITY = 20,
     MAX_PASSENGERS = 200,
@@ -21,8 +21,8 @@ enum {
 // начинаем в 9:00
 
 typedef struct BadWeather {
-    int start; // Начало порыва в 
-    int end;   // Конец порыва
+    int start; // начало сильного ветра в секундах от 09:00
+    int end;   // окончание сильного ветра, не включается в интервал
 } BadWeather;
 
 typedef struct Settings {

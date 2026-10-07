@@ -11,11 +11,11 @@
 #include <unistd.h>
 
 
-// пишем в консоль через дескриптор write(STDOUT_FILENO, text, remaining)
+// выводим вопросы в stderr, чтобы перенаправление stdout сохраняло только журнал
 static Status write_text(const char *text) {
     size_t remaining = strlen(text);
     while (remaining > 0) {
-        ssize_t written = write(STDOUT_FILENO, text, remaining);
+        ssize_t written = write(STDERR_FILENO, text, remaining);
         if (written < 0 && errno == EINTR) {
             continue;
         }
@@ -126,6 +126,27 @@ static Status ask_probability(const char *prompt, double maximum, double *value)
     }
 }
 
+static Status ask_wind_intervals(Settings *settings) {
+    if (ask_integer("Количество интервалов сильного ветра", 0, MAX_WIND_INTERVALS,
+                    &settings->wind_count) != SUCCESS) return ERROR;
+
+    int maximum_time = settings->work_time + MAX_DRAIN_TIME;
+    for (int index = 0; index < settings->wind_count; ++index) {
+        char prompt[128];
+        int length = snprintf(prompt, sizeof(prompt),
+                              "Ветер %d: начало в секундах от 09:00", index + 1);
+        SOFT_ASSERT(length > 0 && (size_t)length < sizeof(prompt), "Слишком длинный вопрос", ERROR);
+        if (ask_integer(prompt, 0, maximum_time - 1, &settings->wind[index].start) != SUCCESS) return ERROR;
+
+        length = snprintf(prompt, sizeof(prompt),
+                          "Ветер %d: окончание в секундах от 09:00", index + 1);
+        SOFT_ASSERT(length > 0 && (size_t)length < sizeof(prompt), "Слишком длинный вопрос", ERROR);
+        if (ask_integer(prompt, settings->wind[index].start + 1, maximum_time,
+                        &settings->wind[index].end) != SUCCESS) return ERROR;
+    }
+    return SUCCESS;
+}
+
 // гланая функция сбора информации с консоли с помощью контрольныйх вопросов
 Status input_data(Settings *settings) {
     SOFT_ASSERT(settings != NULL, "Не передана структура настроек", ERROR);
@@ -150,7 +171,8 @@ Status input_data(Settings *settings) {
         ask_probability("Вероятность VIP-билета (0–1, например 0.2): ",
                          1.0, &entered.vip_probability) != SUCCESS ||
         ask_probability("Вероятность поломки за модельную минуту (0–0.5): ",
-                         MAX_BREAKDOWN_PROBABILITY, &entered.breakdown_probability) != SUCCESS) {
+                         MAX_BREAKDOWN_PROBABILITY, &entered.breakdown_probability) != SUCCESS ||
+        ask_wind_intervals(&entered) != SUCCESS) {
         return ERROR;
     }
     *settings = entered; // если весь ввод успешен, то заполняем ориг
