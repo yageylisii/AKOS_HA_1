@@ -26,12 +26,12 @@ typedef struct BadWeather {
 } BadWeather;
 
 typedef struct Settings {
-    int cabines;    // всего кабин
+    int cabin_count;    // всего кабин
     int boarding_time; // Посадка одного пассажира, секунды
     int unloading_time; // Высадка одного пассажира, секунды
     double vip_probability; // Доля VIP: от 0 до 1
     int capacity;    // Вместимость
-    int time_between_stations; // время в пути в секундах
+    int travel_time; // время в пути в секундах
     int work_time; // Длительность приёма пассажиров с 09:00, задаётся с консоли в секундах
 
     int max_passengers; // Максимум появившихся пассажиров за день суммарно на обеих станциях

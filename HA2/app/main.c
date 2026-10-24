@@ -5,14 +5,16 @@
 #include <signal.h>
 #include <time.h>
 
+// запоминает запрос на завершение из обработчика сигнала
 static void request_shutdown(int signal_number) {
     (void)signal_number;
     service_interrupted = 1;
 }
 
+// запускает программу и освобождает ресурсы перед выходом
 int main(void) {
     Service service = {0};
-    
+
     if (input_data(&service.settings) != SUCCESS) {
         return ERROR;
     }

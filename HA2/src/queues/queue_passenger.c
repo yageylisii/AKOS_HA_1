@@ -4,7 +4,7 @@
 #include <limits.h>
 #include <stdlib.h>
 
-// создать очередб
+// создаёт пустую очередь пассажиров
 Status queue_init(Queue *queue) {
     SOFT_ASSERT(queue != NULL, "Не передана очередь", ERROR);
     queue->head = NULL;
@@ -13,7 +13,7 @@ Status queue_init(Queue *queue) {
     return SUCCESS;
 }
 
-// добавить объект в конец очереди
+// добавляет пассажира в конец очереди
 Status add_passenger(Queue *queue, Passenger passenger) {
     SOFT_ASSERT(queue != NULL, "Не передана очередь", ERROR);
     SOFT_ASSERT(queue->count < INT_MAX, "Переполнение счётчика очереди", ERROR);
@@ -33,7 +33,7 @@ Status add_passenger(Queue *queue, Passenger passenger) {
     return SUCCESS;
 }
 
-// взять объект из начала очереди
+// извлекает первого пассажира из очереди
 Status take_passenger(Queue *queue, Passenger *passenger) {
     SOFT_ASSERT(queue != NULL, "Не передана очередь", ERROR);
     SOFT_ASSERT(passenger != NULL, "Не передан указатель для пассажира", ERROR);
@@ -50,7 +50,7 @@ Status take_passenger(Queue *queue, Passenger *passenger) {
     return SUCCESS;
 }
 
-// 
+// возвращает первого пассажира без удаления из очереди
 Status queue_peek(const Queue *queue, Passenger *passenger) {
     SOFT_ASSERT(queue != NULL, "Не передана очередь", ERROR);
     SOFT_ASSERT(passenger != NULL, "Не передан указатель для пассажира", ERROR);
@@ -60,7 +60,7 @@ Status queue_peek(const Queue *queue, Passenger *passenger) {
     return SUCCESS;
 }
 
-// очистить
+// освобождает все узлы очереди пассажиров
 Status queue_clear(Queue *queue) {
     SOFT_ASSERT(queue != NULL, "Не передана очередь", ERROR);
     QueueNode *node = queue->head;

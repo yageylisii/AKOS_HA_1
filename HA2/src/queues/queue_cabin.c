@@ -4,7 +4,7 @@
 #include <limits.h>
 #include <stdlib.h>
 
-// создать очередб
+// создаёт пустую очередь кабин
 Status cabin_queue_init(CabinQueue *queue) {
     SOFT_ASSERT(queue != NULL, "Не передана очередь", ERROR);
     queue->head = NULL;
@@ -13,7 +13,7 @@ Status cabin_queue_init(CabinQueue *queue) {
     return SUCCESS;
 }
 
-// добавить объект в конец очереди
+// добавляет кабину в конец очереди
 Status add_cabin(CabinQueue *queue, int cabin_id) {
     SOFT_ASSERT(queue != NULL, "Не передана очередь", ERROR);
     SOFT_ASSERT(queue->count < INT_MAX, "Переполнение счётчика очереди", ERROR);
@@ -33,7 +33,7 @@ Status add_cabin(CabinQueue *queue, int cabin_id) {
     return SUCCESS;
 }
 
-// взять объект из начала очереди
+// извлекает первую кабину из очереди
 Status take_cabin(CabinQueue *queue, int *cabin_id) {
     SOFT_ASSERT(queue != NULL, "Не передана очередь", ERROR);
     SOFT_ASSERT(cabin_id != NULL, "Не передан указатель для ID кабины", ERROR);
@@ -50,7 +50,7 @@ Status take_cabin(CabinQueue *queue, int *cabin_id) {
     return SUCCESS;
 }
 
-// 
+// возвращает номер первой кабины без удаления из очереди
 Status cabin_queue_peek(const CabinQueue *queue, int *cabin_id) {
     SOFT_ASSERT(queue != NULL, "Не передана очередь", ERROR);
     SOFT_ASSERT(cabin_id != NULL, "Не передан указатель для ID кабины", ERROR);
@@ -60,7 +60,7 @@ Status cabin_queue_peek(const CabinQueue *queue, int *cabin_id) {
     return SUCCESS;
 }
 
-// очистить
+// освобождает все узлы очереди кабин
 Status cabin_queue_clear(CabinQueue *queue) {
     SOFT_ASSERT(queue != NULL, "Не передана очередь", ERROR);
     CabinQueueNode *node = queue->head;
@@ -75,6 +75,7 @@ Status cabin_queue_clear(CabinQueue *queue) {
     return SUCCESS;
 }
 
+// удаляет кабину с указанным номером из очереди
 Status remove_cabin(CabinQueue *queue, int cabin_id) {
     SOFT_ASSERT(queue != NULL, "Не передана очередь", ERROR);
     CabinQueueNode *previous = NULL;

@@ -11,7 +11,7 @@
 #include <unistd.h>
 
 
-// выводим вопросы в stderr, чтобы перенаправление stdout сохраняло только журнал
+// записывает текст через файловый дескриптор
 static Status write_text(const char *text) {
     size_t remaining = strlen(text);
     while (remaining > 0) {
@@ -28,14 +28,14 @@ static Status write_text(const char *text) {
     return SUCCESS;
 }
 
-// записываем в буфер строку которую ввел пользователь
+// читает строку и проверяет размер входного буфера
 static Status read_line(char *buffer, size_t capacity) {
     size_t length = 0;
     int too_long = 0;
     for (;;) {
-        // читаем побайтово консоль в ch
-        char ch;
-        ssize_t result = read(STDIN_FILENO, &ch, 1);
+        // читаем побайтово консоль в character
+        char character;
+        ssize_t result = read(STDIN_FILENO, &character, 1);
 
         if (result < 0 && errno == EINTR) {
             continue;
@@ -43,22 +43,22 @@ static Status read_line(char *buffer, size_t capacity) {
         if (result < 0) {
             return ERROR;
         }
-        if (result == 0 || ch == '\n') {
+        if (result == 0 || character == '\n') {
             if (result == 0 && length == 0 && !too_long) {
                 return ERROR;
             }
             buffer[length] = '\0';
             return too_long ? INVALID_INPUT : SUCCESS;
         }
-        if (ch == '\0' || length + 1 >= capacity) {
+        if (character == '\0' || length + 1 >= capacity) {
             too_long = 1;
         } else {
-            buffer[length++] = ch;
+            buffer[length++] = character;
         }
     }
 }
 
-// проверка ввода пользователя в соответсвиями с ограничениями
+// проверяет целое число и его допустимый диапазон
 static Status parse_integer(const char *buffer, Status status, int minimum, int maximum, int *value) {
     SOFT_ASSERT(status == SUCCESS, "Слишком длинная строка или недопустимый символ", ERROR);
 
@@ -80,6 +80,7 @@ static Status parse_integer(const char *buffer, Status status, int minimum, int 
     return SUCCESS;
 }
 
+// запрашивает целое число до получения корректного ответа
 static Status ask_integer(const char *prompt, int minimum, int maximum, int *value) {
     char question[256];
     int length = snprintf(question, sizeof(question), "%s [%d–%d]: ", prompt, minimum, maximum);
@@ -101,7 +102,7 @@ static Status ask_integer(const char *prompt, int minimum, int maximum, int *val
 }
 
 
-// вероятность вводится долей: 0.2 - парсим
+// проверяет вероятность и её допустимый диапазон
 static Status parse_probability(const char *buffer, Status status, double maximum, double *value) {
     SOFT_ASSERT(status == SUCCESS, "Слишком длинная строка или недопустимый символ", ERROR);
     char *end;
@@ -116,6 +117,7 @@ static Status parse_probability(const char *buffer, Status status, double maximu
     return SUCCESS;
 }
 
+// запрашивает вероятность до получения корректного ответа
 static Status ask_probability(const char *prompt, double maximum, double *value) {
     for (;;) {
         char buffer[128];
@@ -126,6 +128,7 @@ static Status ask_probability(const char *prompt, double maximum, double *value)
     }
 }
 
+// запрашивает начало и окончание периодов сильного ветра
 static Status ask_wind_intervals(Settings *settings) {
     if (ask_integer("Количество интервалов сильного ветра", 0, MAX_WIND_INTERVALS,
                     &settings->wind_count) != SUCCESS) return ERROR;
@@ -147,17 +150,17 @@ static Status ask_wind_intervals(Settings *settings) {
     return SUCCESS;
 }
 
-// гланая функция сбора информации с консоли с помощью контрольныйх вопросов
+// собирает настройки модели с помощью вопросов в консоли
 Status input_data(Settings *settings) {
     SOFT_ASSERT(settings != NULL, "Не передана структура настроек", ERROR);
     Settings entered = *settings;
-    if (ask_integer("Количество кабин", 1, MAX_CABINS, &entered.cabines) != SUCCESS ||
+    if (ask_integer("Количество кабин", 1, MAX_CABINS, &entered.cabin_count) != SUCCESS ||
         ask_integer("Вместимость одной кабины", 1, MAX_CABIN_CAPACITY, &entered.capacity) != SUCCESS ||
         ask_integer("Максимальное количество пассажиров за день (обе станции)",
                      0, MAX_PASSENGERS, &entered.max_passengers) != SUCCESS ||
         ask_integer("Длительность работы с 09:00 в секундах", 1, MAX_WORK_TIME, &entered.work_time) != SUCCESS ||
         ask_integer("Время пути между станциями в секундах",
-                     1, MAX_TRAVEL_TIME, &entered.time_between_stations) != SUCCESS ||
+                     1, MAX_TRAVEL_TIME, &entered.travel_time) != SUCCESS ||
         ask_integer("Длительность остановки из-за поломки в секундах",
                      1, MAX_BREAKDOWN_DURATION, &entered.breakdown_duration) != SUCCESS ||
         ask_integer("Интервал появления пассажиров в секундах",

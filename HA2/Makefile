@@ -9,7 +9,7 @@ CFLAGS += -Wall -Werror -Wformat-security -Wignored-qualifiers -Winit-self \
 	-Wstrict-prototypes -Wold-style-definition -Wmissing-field-initializers \
 	-Wnested-externs -Wmissing-prototypes -Wfloat-equal
 
-# Эти предупреждения поддерживает GCC, но не Apple Clang.
+# Набор предупреждений зависит от выбранного компилятора.
 ifeq ($(findstring clang,$(shell $(CC) --version 2>/dev/null)),)
 CFLAGS += -Wold-style-declaration -Wmissing-parameter-type -Wstack-usage=4096
 else
@@ -60,10 +60,17 @@ $(BUILD_DIR)/tests/input_logs.o: src/inputs/input_logs.c
 $(TEST_TARGET): $(TEST_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(TEST_OBJS) $(LDLIBS)
 
-test: $(TEST_TARGET)
+WORKER_TEST = $(BUILD_DIR)/tests/worker_test
+WORKER_OBJS = $(BUILD_DIR)/tests/worker_test.o $(filter-out $(BUILD_DIR)/tests/service_test.o,$(TEST_OBJS))
+
+$(WORKER_TEST): $(WORKER_OBJS)
+	$(CC) $(LDFLAGS) -o $@ $(WORKER_OBJS) $(LDLIBS)
+
+test: $(TEST_TARGET) $(WORKER_TEST)
 	$(TEST_TARGET) > $(BUILD_DIR)/tests/service.log
+	$(WORKER_TEST) > $(BUILD_DIR)/tests/worker.log
 
 clean:
-	rm -f $(OBJS) $(DEPS) $(TARGET) $(TEST_TARGET) $(TEST_OBJS) $(TEST_OBJS:.o=.d) $(BUILD_DIR)/tests/service.log
+	rm -f $(OBJS) $(DEPS) $(TARGET) $(TEST_TARGET) $(TEST_OBJS) $(TEST_OBJS:.o=.d) $(WORKER_TEST) $(WORKER_OBJS) $(WORKER_OBJS:.o=.d) $(BUILD_DIR)/tests/service.log $(BUILD_DIR)/tests/worker.log
 
--include $(DEPS) $(TEST_OBJS:.o=.d)
+-include $(DEPS) $(TEST_OBJS:.o=.d) $(WORKER_OBJS:.o=.d)

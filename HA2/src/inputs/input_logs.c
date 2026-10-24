@@ -10,12 +10,13 @@
 #include <time.h>
 #include <unistd.h>
 
+// возвращает обозначение станции по её номеру
 const char *station_name(int station_id) {
     return station_id == 1 ? "🅰️" : station_id == 2 ? "🅱️" : "?";
 }
 
 
-// записываем текст в консоль с помощью дескриптора
+// записывает текст через файловый дескриптор
 static Status write_text(const char *text, size_t length) {
     size_t offset = 0;
     while (offset < length) {
@@ -27,6 +28,7 @@ static Status write_text(const char *text, size_t length) {
     return SUCCESS;
 }
 
+// выводит накопленную группу событий с задержкой между группами
 Status log_flush(EventLog *log) {
     SOFT_ASSERT(log != NULL, "Не передан журнал", ERROR);
 
@@ -50,6 +52,7 @@ Status log_flush(EventLog *log) {
     return SUCCESS;
 }
 
+// добавляет событие в журнал текущего модельного времени
 Status log_event(EventLog *log, int event_time, const char *format, ...) {
     SOFT_ASSERT(log != NULL && format != NULL && event_time >= 0, "Неверные параметры журнала", ERROR);
     char event[512];
@@ -110,6 +113,7 @@ Status log_event(EventLog *log, int event_time, const char *format, ...) {
     return SUCCESS;
 }
 
+// освобождает буфер журнала
 void log_destroy(EventLog *log) {
     if (!log) return;
     free(log->buffer);

@@ -5,14 +5,14 @@
 #include "components/passenger.h"
 
 
-typedef enum Statement {
+typedef enum CabinState {
     ON_STATION = 0, // на станции
-    IN_WALK = 1, // в пути 
+    IN_TRANSIT = 1, // в пути
     BOARDING = 2, // посадка
-    DROP = 3, // высадка
+    UNLOADING = 3, // высадка
     WAITING_FOR_STATION = 4, // Перед станцией, двери закрыты
     PARKED = 5 // Резерв/стоянка вне мест обслуживания
-} Statement;
+} CabinState;
 
 typedef struct Cabin {
     int id; // Номер кабины
@@ -20,9 +20,9 @@ typedef struct Cabin {
     bool has_boarding_passenger;
     int passengers;  // Текущее количество пассажиров (от 0 до capacity)
     Passenger *passenger_list; // Массив из capacity пассажиров; выделяется при создании кабины
-    int operation_time_remaining; // Осталось секунд движения, посадки или высадки
+    int time_left; // Осталось секунд движения, посадки или высадки
     bool doors_open;  // 1 — двери открыты, 0 — закрыты
-    Statement state; // состояние кабины
+    CabinState state; // состояние кабины
     int departure_station;   // Станция отправления
     int destination_station; // Станция назначения
 } Cabin ;
