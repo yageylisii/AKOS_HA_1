@@ -6,10 +6,10 @@
 
 
 typedef enum Statement {
-    ON_STATION = 0,
-    IN_WALK = 1,
-    BOARDING = 2,
-    DROP = 3,
+    ON_STATION = 0, // на станции
+    IN_WALK = 1, // в пути 
+    BOARDING = 2, // посадка
+    DROP = 3, // высадка
     WAITING_FOR_STATION = 4, // Перед станцией, двери закрыты
     PARKED = 5 // Резерв/стоянка вне мест обслуживания
 } Statement;

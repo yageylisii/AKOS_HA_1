@@ -6,7 +6,7 @@
 
 int main(void) {
     Service service = {0};
-    // По умолчанию сильного ветра нет: wind_count = 0.
+    
     if (input_data(&service.settings) != SUCCESS) {
         return ERROR;
     }
@@ -15,6 +15,10 @@ int main(void) {
         return ERROR;
     }
     Status result = service_run(&service);
+    if (result != SUCCESS) {
+        return ERROR;
+    }
+
     service_destroy(&service);
     return result;
 }

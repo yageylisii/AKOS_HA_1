@@ -1,2 +1,6 @@
 cable_car
 *.o
+./build
+build/
+*.txt
+
