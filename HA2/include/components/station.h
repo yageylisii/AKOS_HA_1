@@ -7,7 +7,7 @@
 enum { STATION_CABIN_CAPACITY = 3 };
 
 typedef struct Station {
-    int ID_station; // 1 или 2
+    int station_id; // 1 или 2
 
     Queue vip;     // Очередь VIP-пассажиров
     Queue regular; // Очередь обычных пассажиров

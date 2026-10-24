@@ -4,21 +4,24 @@
 #include <time.h>
 #include "components/service.h"
 
-// В тестах пропускаем только реальную задержку журнала, не модельное время.
+// пропускает реальную задержку в тестах
 int test_nanosleep(const struct timespec *requested, struct timespec *remaining);
+// пропускает реальную задержку в тестах
 int test_nanosleep(const struct timespec *requested, struct timespec *remaining) {
     (void)requested;
     (void)remaining;
     return 0;
 }
 
+// возвращает начальные настройки тестовой модели
 static Settings settings(void) {
-    return (Settings){.cabines=10,.capacity=20,.time_between_stations=30,.work_time=350,
+    return (Settings){.cabin_count=10,.capacity=20,.travel_time=30,.work_time=350,
         .max_passengers=100,.arrival_interval=50,.passengers_per_interval=20,
         .boarding_time=10,.unloading_time=10,.vip_probability=.5,
         .breakdown_probability=.5,.breakdown_duration=20};
 }
 
+// проверяет вместимость расположение кабин и учёт пассажиров
 static void check_invariants(const Service *service) {
     int cabin_locations[32]={0};
     int *passenger_locations=calloc(1001,sizeof(*passenger_locations));
@@ -42,7 +45,7 @@ static void check_invariants(const Service *service) {
             assert(++cabin_locations[node->cabin_id]==1);
             const Cabin *cabin=&service->cabins[node->cabin_id-1];
             assert(cabin->departure_station==station_index+1);
-            assert(cabin->state==ON_STATION || cabin->state==DROP || cabin->state==BOARDING);
+            assert(cabin->state==ON_STATION || cabin->state==UNLOADING || cabin->state==BOARDING);
             assert(cabin->doors_open);
             ++count;
         }
@@ -57,10 +60,10 @@ static void check_invariants(const Service *service) {
         }
         assert(count==station->waiting_cabins.count);
     }
-    for(int index=0;index<service->settings.cabines;++index) {
+    for(int index=0;index<service->settings.cabin_count;++index) {
         const Cabin *cabin=&service->cabins[index];
         assert(cabin->passengers>=0 && cabin->passengers+cabin->has_boarding_passenger<=service->settings.capacity);
-        if(cabin->state==PARKED || cabin->state==IN_WALK) {
+        if(cabin->state==PARKED || cabin->state==IN_TRANSIT) {
             assert(!cabin->doors_open && cabin_locations[cabin->id]==0);
         } else assert(cabin_locations[cabin->id]==1);
         for(int passenger_index=0;passenger_index<cabin->passengers;++passenger_index)
@@ -75,11 +78,13 @@ static void check_invariants(const Service *service) {
     free(passenger_locations);
 }
 
+// выполняет шаг модели и проверяет инварианты
 static void step(Service *service) {
     assert(service_step(service)==SUCCESS);
     check_invariants(service);
 }
 
+// добавляет тестового пассажира в очередь станции
 static void add_person(Service *service,int station_id,int id,int priority) {
     Passenger passenger={.id=id,.priority=priority};
     Queue *queue=priority==0 ? &service->stations[station_id-1].vip : &service->stations[station_id-1].regular;
@@ -88,9 +93,10 @@ static void add_person(Service *service,int station_id,int id,int priority) {
     service->next_passenger_id=id+1;
 }
 
+// проверяет закрепление пассажира и длительность операций
 static void test_reserved_boarding(void) {
     Service service={0};service.settings=settings();
-    service.settings.cabines=1;service.settings.capacity=2;service.settings.max_passengers=0;
+    service.settings.cabin_count=1;service.settings.capacity=2;service.settings.max_passengers=0;
     service.settings.breakdown_probability=0;
     assert(service_init(&service)==SUCCESS);
     add_person(&service,1,1,1);
@@ -105,10 +111,10 @@ static void test_reserved_boarding(void) {
     while(service.current_time<20) step(&service);
     assert(service.cabins[0].passengers==1);
     step(&service);
-    assert(service.cabins[0].passengers==2 && service.cabins[0].state==IN_WALK);
+    assert(service.cabins[0].passengers==2 && service.cabins[0].state==IN_TRANSIT);
     while(service.current_time<50) step(&service);
     step(&service); // Прибытие t=50; сразу началась высадка.
-    assert(service.cabins[0].state==DROP && service.cabins[0].operation_time_remaining==10);
+    assert(service.cabins[0].state==UNLOADING && service.cabins[0].time_left==10);
     while(service.current_time<60) step(&service);
     assert(service.statistics.delivered==0);
     step(&service);
@@ -116,61 +122,64 @@ static void test_reserved_boarding(void) {
     service_destroy(&service);
 }
 
+// проверяет одновременную высадку и вместимость станции
 static void test_parallel_and_capacity(void) {
-    Service service={0};service.settings=settings();service.settings.cabines=4;
+    Service service={0};service.settings=settings();service.settings.cabin_count=4;
     service.settings.capacity=1;service.settings.max_passengers=0;service.settings.breakdown_probability=0;
     assert(service_init(&service)==SUCCESS);
     // Четыре полные кабины одновременно заканчивают путь на A.
     for(int index=0;index<4;++index) {
         Cabin *cabin=&service.cabins[index];
         assert(remove_cabin(&service.stations[cabin->departure_station-1].cabins,cabin->id)==SUCCESS);
-        cabin->state=IN_WALK;cabin->doors_open=false;cabin->destination_station=1;
-        cabin->operation_time_remaining=1;
+        cabin->state=IN_TRANSIT;cabin->doors_open=false;cabin->destination_station=1;
+        cabin->time_left=1;
         cabin->passenger_list[0]=(Passenger){.id=index+1};cabin->passengers=1;
     }
     service.statistics.accepted=4;service.current_time=1;
     step(&service);
     assert(service.stations[0].cabins.count==3 && service.stations[0].waiting_cabins.count==1);
-    for(int index=0;index<3;++index) assert(service.cabins[index].state==DROP);
+    for(int index=0;index<3;++index) assert(service.cabins[index].state==UNLOADING);
     while(service.current_time<11) step(&service);
     step(&service);
     assert(service.statistics.delivered==3);
     // Освободившееся место используется в t=11, первая высадка четвёртой — t=21.
-    assert(service.cabins[3].state==DROP && service.cabins[3].operation_time_remaining==10);
+    assert(service.cabins[3].state==UNLOADING && service.cabins[3].time_left==10);
     while(service.current_time<21) step(&service);
     step(&service);assert(service.statistics.delivered==4);
     service_destroy(&service);
 }
 
+// проверяет остановки и завершение начатых рейсов
 static void test_stops_and_finish(void) {
-    Service service={0};service.settings=settings();service.settings.cabines=1;
+    Service service={0};service.settings=settings();service.settings.cabin_count=1;
     service.settings.capacity=1;service.settings.max_passengers=0;service.settings.work_time=1;
     service.settings.breakdown_probability=0;
     service.settings.wind_count=1;service.settings.wind[0]=(BadWeather){5,15};
     assert(service_init(&service)==SUCCESS);add_person(&service,1,1,0);
     while(service.current_time<20) step(&service);
     assert(service.cabins[0].passengers==0);step(&service);
-    assert(service.cabins[0].state==IN_WALK); // 10 секунд посадки + 10 секунд ветра.
+    assert(service.cabins[0].state==IN_TRANSIT); // 10 секунд посадки + 10 секунд ветра.
     while(service.current_time<50) {assert(service.status!=SERVICE_FINISHED);step(&service);}
-    step(&service);assert(service.cabins[0].state==DROP);
+    step(&service);assert(service.cabins[0].state==UNLOADING);
     while(service.current_time<60) step(&service);
     step(&service);assert(service.status==SERVICE_FINISHED && service.current_time==60);
     assert(service.cabins[0].state==PARKED);service_destroy(&service);
     // Пустой уже начатый рейс тоже должен закончиться.
-    service=(Service){0};service.settings=settings();service.settings.cabines=1;
+    service=(Service){0};service.settings=settings();service.settings.cabin_count=1;
     service.settings.max_passengers=0;service.settings.work_time=1;service.settings.breakdown_probability=0;
     assert(service_init(&service)==SUCCESS);
     assert(remove_cabin(&service.stations[0].cabins,1)==SUCCESS);
-    service.cabins[0].state=IN_WALK;
+    service.cabins[0].state=IN_TRANSIT;
     service.cabins[0].doors_open=false;
-    service.cabins[0].operation_time_remaining=30;
+    service.cabins[0].time_left=30;
     while(service.current_time<30) {step(&service);assert(service.status!=SERVICE_FINISHED);}
     step(&service);assert(service.status==SERVICE_FINISHED && service.current_time==30);
     service_destroy(&service);
 }
 
+// проверяет ограничения настроек простой и аварийное завершение
 static void test_limits_and_idle(void) {
-    Service service={0};service.settings=settings();service.settings.cabines=MAX_CABINS+1;
+    Service service={0};service.settings=settings();service.settings.cabin_count=MAX_CABINS+1;
     assert(service_init(&service)==ERROR && service.cabins==NULL);
     service.settings=settings();service.settings.breakdown_probability=.6;
     assert(service_init(&service)==ERROR && service.cabins==NULL);
@@ -179,8 +188,8 @@ static void test_limits_and_idle(void) {
     assert(service_init(&service)==SUCCESS);
     while(service.current_time<100) {
         step(&service);
-        for(int index=0;index<service.settings.cabines;++index)
-            assert(service.cabins[index].state!=IN_WALK);
+        for(int index=0;index<service.settings.cabin_count;++index)
+            assert(service.cabins[index].state!=IN_TRANSIT);
     }
     step(&service);assert(service.status==SERVICE_FINISHED);service_destroy(&service);
     service=(Service){0};service.settings=settings();service.settings.max_passengers=0;
@@ -191,8 +200,9 @@ static void test_limits_and_idle(void) {
     service_destroy(&service);
 }
 
+// проверяет вызов резерва только для пассажиров своей станции
 static void test_reserve_local_demand(void) {
-    Service service={0};service.settings=settings();service.settings.cabines=5;
+    Service service={0};service.settings=settings();service.settings.cabin_count=5;
     service.settings.max_passengers=0;service.settings.breakdown_probability=0;
     assert(service_init(&service)==SUCCESS);
     assert(remove_cabin(&service.stations[0].cabins,5)==SUCCESS);
@@ -209,7 +219,7 @@ static void test_reserve_local_demand(void) {
     assert(service.cabins[4].has_boarding_passenger && service.cabins[4].boarding_passenger.id==9);
     service_destroy(&service);
 
-    service=(Service){0};service.settings=settings();service.settings.cabines=9;
+    service=(Service){0};service.settings=settings();service.settings.cabin_count=9;
     service.settings.max_passengers=0;service.settings.breakdown_probability=0;
     assert(service_init(&service)==SUCCESS);
     // На A одна работающая кабина и несколько резервных, но пассажиров лишь двое.
@@ -225,13 +235,16 @@ static void test_reserve_local_demand(void) {
     service_destroy(&service);
 }
 
+// запускает проверки модели и серию прогонов с разными настройками
 int main(void) {
     test_reserve_local_demand();
     test_limits_and_idle();
-    test_reserved_boarding();test_parallel_and_capacity();test_stops_and_finish();
+    test_reserved_boarding();
+    test_parallel_and_capacity();
+    test_stops_and_finish();
     for(int seed=0;seed<30;++seed) {
         srand((unsigned)seed);
-        Service service={0};service.settings=settings();service.settings.cabines=seed%12+1;
+        Service service={0};service.settings=settings();service.settings.cabin_count=seed%12+1;
         service.settings.wind_count=2;service.settings.wind[0]=(BadWeather){13,26};
         service.settings.wind[1]=(BadWeather){20,40};
         assert(service_init(&service)==SUCCESS);check_invariants(&service);
@@ -239,7 +252,7 @@ int main(void) {
         while(service.status!=SERVICE_FINISHED && steps++<20000) step(&service);
         assert(service.status==SERVICE_FINISHED);
         assert(service.statistics.accepted==100 && service.statistics.delivered==100);
-        for(int index=0;index<service.settings.cabines;++index) assert(service.cabins[index].state==PARKED);
+        for(int index=0;index<service.settings.cabin_count;++index) assert(service.cabins[index].state==PARKED);
         assert(log_flush(&service.event_log)==SUCCESS);service_destroy(&service);
     }
     Service service={0};service.settings=settings();service.settings.max_passengers=0;

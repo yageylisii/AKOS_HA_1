@@ -14,11 +14,13 @@ typedef struct EventLog {
     bool printed_group;
 } EventLog;
 
-// Журнал первоначально обнулён
-// События одного времени собираются в одну группу
+// добавляет событие в журнал текущего модельного времени
 Status log_event(EventLog *log, int event_time, const char *format, ...);
+// выводит накопленную группу событий с задержкой между группами
 Status log_flush(EventLog *log);
+// освобождает буфер журнала
 void log_destroy(EventLog *log);
+// возвращает обозначение станции по её номеру
 const char *station_name(int station_id);
 
 #endif

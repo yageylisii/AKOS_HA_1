@@ -8,6 +8,7 @@ struct MailboxNode {
     MailboxNode *next;
 };
 
+// создаёт очередь сообщений мьютекс и семафор
 Status mailbox_init(Mailbox *mailbox) {
     if (mailbox == NULL) return ERROR;
     *mailbox = (Mailbox){0};
@@ -20,6 +21,7 @@ Status mailbox_init(Mailbox *mailbox) {
     return SUCCESS;
 }
 
+// добавляет сообщение и будит получателя
 Status mailbox_send(Mailbox *mailbox, ActorMessage message) {
     if (mailbox == NULL || !mailbox->initialized) return ERROR;
     MailboxNode *node = malloc(sizeof(*node));
@@ -45,6 +47,7 @@ Status mailbox_send(Mailbox *mailbox, ActorMessage message) {
     return SUCCESS;
 }
 
+// ожидает сообщение и извлекает его из очереди
 Status mailbox_receive(Mailbox *mailbox, ActorMessage *message) {
     if (mailbox == NULL || message == NULL || !mailbox->initialized) return ERROR;
     int wait_result;
@@ -67,6 +70,7 @@ Status mailbox_receive(Mailbox *mailbox, ActorMessage *message) {
     return SUCCESS;
 }
 
+// закрывает очередь и будит ожидающего получателя
 void mailbox_close(Mailbox *mailbox) {
     if (mailbox == NULL || !mailbox->initialized) return;
     if (pthread_mutex_lock(&mailbox->mutex) != 0) return;
@@ -76,6 +80,7 @@ void mailbox_close(Mailbox *mailbox) {
     if (was_open) sem_post(&mailbox->available);
 }
 
+// освобождает очередь после завершения её потока
 void mailbox_destroy(Mailbox *mailbox) {
     if (mailbox == NULL || !mailbox->initialized) return;
     MailboxNode *node = mailbox->head;

@@ -19,10 +19,15 @@ typedef struct Mailbox {
     bool initialized;
 } Mailbox;
 
+// создаёт очередь сообщений мьютекс и семафор
 Status mailbox_init(Mailbox *mailbox);
+// добавляет сообщение и будит получателя
 Status mailbox_send(Mailbox *mailbox, ActorMessage message);
+// ожидает сообщение и извлекает его из очереди
 Status mailbox_receive(Mailbox *mailbox, ActorMessage *message);
+// закрывает очередь и будит ожидающего получателя
 void mailbox_close(Mailbox *mailbox);
+// освобождает очередь после завершения её потока
 void mailbox_destroy(Mailbox *mailbox);
 
 #endif

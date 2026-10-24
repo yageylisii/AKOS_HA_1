@@ -15,16 +15,18 @@ typedef struct CabinQueue {
     int count;
 } CabinQueue;
 
-// Начальная инициализация; также допустимо CabinQueue queue = {0}.
-// Для очистки непустой очереди использовать cabin_queue_clear().
-// Очередь владеет узлами, её нельзя копировать присваиванием.
+// создаёт пустую очередь кабин
 Status cabin_queue_init(CabinQueue *queue);
+// добавляет кабину в конец очереди
 Status add_cabin(CabinQueue *queue, int cabin_id);
+// извлекает первую кабину из очереди
 Status take_cabin(CabinQueue *queue, int *cabin_id);
+// возвращает номер первой кабины без удаления из очереди
 Status cabin_queue_peek(const CabinQueue *queue, int *cabin_id);
-// Удалить указанную кабину, сохраняя порядок остальных.
+// удаляет кабину с указанным номером из очереди
 Status remove_cabin(CabinQueue *queue, int cabin_id);
 
+// освобождает все узлы очереди кабин
 Status cabin_queue_clear(CabinQueue *queue);
 
 // SUCCESS при успехе, ERROR при неверном указателе, пустой очереди

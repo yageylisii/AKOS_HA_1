@@ -12,12 +12,6 @@
 
 struct ThreadRuntime;
 
-// Движение разрешено только при SERVICE_RUNNING и отсутствии обеих причин остановки.
-// При current_time >= settings.work_time приём новых пассажиров закрывается.
-// Модельное время продолжается до доставки пассажиров и завершения начатых рейсов или эвакуации.
-// При остановке состояние кабин сохраняется, operation_time_remaining не уменьшается.
-// При завершении освобождаются пассажиры кабин, массив кабин и обе очереди кабин каждой станции.
-
 enum { STATION_COUNT = 2, SERVICE_START_HOUR = 9 };
 
 typedef enum ServiceStatus {
@@ -33,7 +27,7 @@ typedef struct Service {
     EventLog event_log; // Буфер событий одного модельного времени
     Settings settings;
     Station stations[STATION_COUNT]; // Станции А и Б
-    Cabin *cabins; // Массив из settings.cabines кабин; выделяется при запуске
+    Cabin *cabins; // Массив из settings.cabin_count кабин; выделяется при запуске
     Statistics statistics;
 
     int current_time; // Секунды с начала работы в 09:00; начальное значение — 0
@@ -42,18 +36,23 @@ typedef struct Service {
 
     bool wind_stop; // Остановка из-за сильного ветра
     bool technical_stop; // Остановка из-за неисправности
-    int technical_stop_remaining; // Осталось секунд до устранения неисправности
-    int next_passenger_id; // Следующий свободный ID 
+    int repair_time_left; // Осталось секунд до устранения неисправности
+    int next_passenger_id; // Следующий свободный ID
     struct ThreadRuntime *runtime; // Потоки сущностей; NULL в пошаговых тестах
 } Service;
 
-// Перед init: Service service = {0}; настройки уже заполнены.
-// ID станций — 1 и 2, ID кабин — от 1 до settings.cabines.
-// Настройки после init не изменять; повторный init — только после destroy.
+// перед инициализацией обнулить Service и заполнить настройки
+// после инициализации не менять настройки до service_destroy
+
+// создаёт кабины и размещает их на станциях
 Status service_init(Service *service);
-Status service_step(Service *service); // Один шаг модельного времени (секунда).
+// выполняет один шаг модельного времени
+Status service_step(Service *service);
+// запускает потоки и моделирование до завершения или прерывания
 Status service_run(Service *service);
+// эвакуирует всех оставшихся пассажиров и завершает модель
 Status service_evacuate(Service *service);
-void service_destroy(Service *service); // Освобождение памяти, статистика сохраняется.
+// завершает потоки и освобождает память модели
+void service_destroy(Service *service);
 
 #endif
