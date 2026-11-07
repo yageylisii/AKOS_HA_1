@@ -1,9 +1,9 @@
-// Исходные тесты модели канатной дороги.
+// исходные тесты модели канатной дороги
 //
-// Процессы и семафоры здесь не нужны: шаги участников вызываются
+// процессы и семафоры здесь не нужны: шаги участников вызываются
 // последовательно в том же порядке, в каком их открывает ведущий процесс
 // (сначала оператор, затем станции и кабины). Это позволяет проверить
-// предметную логику и инварианты независимо от межпроцессного обмена.
+// предметную логику и инварианты независимо от межпроцессного обмена
 
 #define _POSIX_C_SOURCE 200809L
 
@@ -66,8 +66,8 @@ static SharedModel *make_model(const Settings *settings)
     return model;
 }
 
-// Один такт модельного времени без семафоров: тот же порядок фаз,
-// что и в ведущем процессе.
+// один такт модельного времени без семафоров: тот же порядок фаз,
+// что и в ведущем процессе
 static void tick(SharedModel *model)
 {
     operator_step(model);
@@ -116,8 +116,8 @@ static void test_queue(void)
     CHECK(queue_at(&queue, 0) == 20, "оставшийся элемент на месте");
 }
 
-// Проверка настроек целиком: конфигурационный файл может содержать что угодно.
-// Сообщения SOFT_ASSERT в выводе теста ожидаемы, это и есть проверяемый отказ.
+// проверка настроек целиком: конфигурационный файл может содержать что угодно
+// сообщения SOFT_ASSERT в выводе теста ожидаемы, это и есть проверяемый отказ
 static void test_settings_validation(void)
 {
     SharedModel *model = calloc(1, sizeof(SharedModel));
@@ -216,7 +216,7 @@ static void test_boarding_duration_and_fixation(void)
     settings.max_passengers = 1;
     SharedModel *model = make_model(&settings);
 
-    // Один обычный пассажир на станции A.
+    // один обычный пассажир на станции A
     station_step(model, 0);
     model->passengers[0].priority = PRIORITY_REGULAR;
     queue_init(&model->stations[0].vip);
@@ -227,11 +227,11 @@ static void test_boarding_duration_and_fixation(void)
     Cabin *cabin = &model->cabins[0];
     CHECK(cabin->state == BOARDING && cabin->doors_open, "кабина на станции с открытыми дверями");
 
-    cabin_step(model, 0); // Закрепление пассажира, начало посадки
+    cabin_step(model, 0); // закрепление пассажира, начало посадки
     CHECK(cabin->boarding_passenger == 1, "пассажир закреплён в начале посадки");
     CHECK(cabin->operation_time_remaining == 4, "длительность посадки задана точно");
 
-    // Позже прибывший VIP не должен занять место посреди операции.
+    // позже прибывший VIP не должен занять место посреди операции
     model->passengers_created = 2;
     model->next_passenger_id = 3;
     model->passengers[1].id = 2;
@@ -246,7 +246,7 @@ static void test_boarding_duration_and_fixation(void)
         cabin_step(model, 0);
         CHECK(cabin->boarding_passenger == 1, "закреплённый пассажир не меняется");
     }
-    cabin_step(model, 0); // Четвёртая секунда: пассажир внутри, берём следующего
+    cabin_step(model, 0); // четвёртая секунда: пассажир внутри, берём следующего
     CHECK(cabin->passengers == 1 && cabin->passenger_ids[0] == 1,
           "первым сел закреплённый пассажир");
     CHECK(model->passengers[0].state == PASSENGER_RIDING, "пассажир в кабине");
@@ -275,8 +275,8 @@ static void test_doors_and_operator_permission(void)
     queue_push(&model->stations[0].regular, 1);
 
     Cabin *cabin = &model->cabins[0];
-    cabin_step(model, 0); // Закрепление
-    cabin_step(model, 0); // Посадка завершена, мест больше нет
+    cabin_step(model, 0); // закрепление
+    cabin_step(model, 0); // посадка завершена, мест больше нет
     CHECK(cabin->passengers == 1, "кабина заполнена");
     CHECK(cabin->state == ON_STATION && !cabin->doors_open, "двери закрыты перед отправлением");
     CHECK(cabin->departure_requested && !cabin->departure_allowed,
@@ -306,7 +306,7 @@ static void test_capacity_limit(void)
     settings.max_passengers = 5;
     SharedModel *model = make_model(&settings);
 
-    // Пять пассажиров на станции A, вместимость два.
+    // пять пассажиров на станции A, вместимость два
     model->passengers_created = 5;
     model->next_passenger_id = 6;
     queue_init(&model->stations[0].vip);
@@ -391,7 +391,7 @@ static void test_evacuation(void)
     free(model);
 }
 
-// Полный прогон до естественного завершения.
+// полный прогон до естественного завершения
 static void run_until_complete(SharedModel *model, int limit, const char *label)
 {
     int steps = 0;
@@ -438,7 +438,7 @@ static void test_full_runs(void)
     }
 }
 
-// Ветер на весь рабочий день: модель завершается по предельному времени.
+// ветер на весь рабочий день: модель завершается по предельному времени
 static void test_drain_timeout(void)
 {
     Settings settings = basic_settings();

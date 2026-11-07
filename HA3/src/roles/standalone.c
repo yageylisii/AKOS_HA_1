@@ -8,8 +8,8 @@
 #include <stdio.h>
 #include <time.h>
 
-// Сколько участник ждёт появления ресурсов, если его запустили
-// раньше управляющей программы, и пауза между попытками.
+// сколько участник ждёт появления ресурсов, если его запустили
+// раньше управляющей программы, и пауза между попытками
 enum { ATTACH_ATTEMPTS = 60, ATTACH_DELAY_MS = 500 };
 
 static void sleep_ms(int milliseconds)
@@ -18,13 +18,13 @@ static void sleep_ms(int milliseconds)
         .tv_sec = milliseconds / 1000,
         .tv_nsec = (long)(milliseconds % 1000) * 1000000L
     };
-    // Прерывание сигналом здесь не мешает: выходим из паузы досрочно.
+    // прерывание сигналом здесь не мешает: выходим из паузы досрочно
     nanosleep(&remaining, &remaining);
 }
 
-// Подключение к ресурсам, созданным управляющей программой.
-// Как в семинарском примере с читателем и писателем, порядок запуска
-// не фиксирован: участник, стартовавший раньше, ждёт появления сегмента.
+// подключение к ресурсам, созданным управляющей программой
+// как в семинарском примере с читателем и писателем, порядок запуска
+// не фиксирован: участник, стартовавший раньше, ждёт появления сегмента
 Status standalone_attach(StandaloneLink *link)
 {
     SOFT_ASSERT(link != NULL, "Не передано подключение", ERROR);
@@ -38,7 +38,7 @@ Status standalone_attach(StandaloneLink *link)
             if (sync_attach_named(&link->sync, SEM_PREFIX_STANDALONE) == SUCCESS) {
                 return SUCCESS;
             }
-            // Сегмент уже есть, а семафоры ещё не созданы: ждём дальше.
+            // сегмент уже есть, а семафоры ещё не созданы: ждём дальше
             shared_memory_detach(&link->memory);
             link->model = NULL;
         }
@@ -68,16 +68,16 @@ void standalone_detach(StandaloneLink *link)
     link->model = NULL;
 }
 
-// Сообщает управляющей программе о своём подключении.
+// сообщает управляющей программе о своём подключении
 Status standalone_announce(StandaloneLink *link)
 {
     SOFT_ASSERT(link != NULL && link->model != NULL, "Нет подключения к модели", ERROR);
     return sync_post(&link->sync, SEM_REGISTERED);
 }
 
-// Ожидание разрешения на запуск. Приём из семинарского примера:
+// ожидание разрешения на запуск. Приём из семинарского примера:
 // участник блокируется на семафоре администратора и сразу поднимает его
-// обратно, пропуская следующего. Опрос состояния в цикле не нужен.
+// обратно, пропуская следующего. Опрос состояния в цикле не нужен
 Status standalone_wait_start(StandaloneLink *link)
 {
     SOFT_ASSERT(link != NULL && link->model != NULL, "Нет подключения к модели", ERROR);
@@ -85,8 +85,8 @@ Status standalone_wait_start(StandaloneLink *link)
     TRY(sync_wait(&link->sync, SEM_ADMIN));
     TRY(sync_post(&link->sync, SEM_ADMIN));
 
-    // Управляющая программа могла поднять семафор не ради старта,
-    // а чтобы выпустить участников при отказе от запуска.
+    // управляющая программа могла поднять семафор не ради старта,
+    // а чтобы выпустить участников при отказе от запуска
     TRY(sync_wait(&link->sync, SEM_MODEL));
     bool allowed = link->model->start_allowed && !link->model->shutdown;
     TRY(sync_post(&link->sync, SEM_MODEL));

@@ -10,18 +10,14 @@
 #include <sys/stat.h>
 #include <time.h>
 
-// Начальные значения семафоров модели. SEM_MODEL работает как двоичный
-// семафор взаимного исключения и свободен сразу, остальные закрыты:
-// такт открывает ведущий процесс, подтверждения приходят от участников.
+// начальные значения семафоров модели
 static unsigned int initial_value(int slot)
 {
     return slot == SEM_MODEL ? 1u : 0u;
 }
-
-// ---------------------------------------------------------------------------
-// Безымянные семафоры: размещены в разделяемой памяти.
-// ---------------------------------------------------------------------------
-
+// --------------------
+// безымянные семафоры
+// --------------------
 Status sync_create_unnamed(SyncSet *set, SharedModel *model)
 {
     SOFT_ASSERT(set != NULL && model != NULL, "Не передан набор семафоров", ERROR);
@@ -31,11 +27,11 @@ Status sync_create_unnamed(SyncSet *set, SharedModel *model)
     set->owner = true;
 
     for (int slot = 0; slot < SEM_SLOT_COUNT; ++slot) {
-        // pshared = 1: семафор разделяется процессами, а не нитями одного процесса.
-        // Он лежит в общей памяти, поэтому его видят и потомки, и сторонние процессы.
+        // pshared = 1: семафор разделяется процессами
+        // он лежит в общей памяти, поэтому его видят и потомки, и сторонние процессы
         if (sem_init(&model->semaphores[slot], 1, initial_value(slot)) == -1) {
             perror("sem_init");
-            // Уничтожаем то, что успели создать.
+            // уничтожаем то, что успели создать
             for (int created = 0; created < slot; ++created) {
                 sem_destroy(&model->semaphores[created]);
             }
@@ -53,7 +49,7 @@ Status sync_attach_unnamed(SyncSet *set, SharedModel *model)
     *set = (SyncSet){0};
     set->mode = SYNC_UNNAMED;
     set->owner = false;
-    // Отдельная инициализация не нужна: семафоры уже лежат в общей памяти.
+    // отдельная инициализация не нужна: семафоры уже лежат в общей памяти
     for (int slot = 0; slot < SEM_SLOT_COUNT; ++slot) {
         set->handles[slot] = &model->semaphores[slot];
     }
@@ -61,7 +57,7 @@ Status sync_attach_unnamed(SyncSet *set, SharedModel *model)
 }
 
 // ---------------------------------------------------------------------------
-// Именованные семафоры: отличаются по именам вида /akos46_named_0.
+// именованные семафоры: отличаются по именам вида /akos46_named_0
 // ---------------------------------------------------------------------------
 
 static void build_name(char *buffer, size_t size, const char *prefix, int slot)
@@ -93,7 +89,7 @@ Status sync_create_named(SyncSet *set, const char *prefix)
     for (int slot = 0; slot < SEM_SLOT_COUNT; ++slot) {
         build_name(set->names[slot], sizeof(set->names[slot]), prefix, slot);
 
-        // O_EXCL отличает новый семафор от оставшегося после прошлого запуска.
+        // флаг O_EXCL отличает новый семафор от оставшегося после прошлого запуска
         sem_t *handle = sem_open(set->names[slot], O_CREAT | O_EXCL, 0600, initial_value(slot));
         if (handle == SEM_FAILED && errno == EEXIST) {
             fprintf(stderr, "Семафор %s остался от прошлого запуска, удаляю\n", set->names[slot]);
@@ -121,10 +117,10 @@ Status sync_attach_named(SyncSet *set, const char *prefix)
     for (int slot = 0; slot < SEM_SLOT_COUNT; ++slot) {
         build_name(set->names[slot], sizeof(set->names[slot]), prefix, slot);
 
-        // Без O_CREAT: открываем только существующий семафор.
+        // без O_CREAT: открываем только существующий семафор
         sem_t *handle = sem_open(set->names[slot], 0);
         if (handle == SEM_FAILED) {
-            // ENOENT: семафоры ещё не созданы управляющей программой.
+            // ошибка ENOENT: семафоры ещё не созданы управляющей программой
             if (errno != ENOENT) {
                 perror("sem_open");
             }
@@ -137,7 +133,7 @@ Status sync_attach_named(SyncSet *set, const char *prefix)
 }
 
 // ---------------------------------------------------------------------------
-// Операции над семафорами.
+// операции над семафорами
 // ---------------------------------------------------------------------------
 
 Status sync_wait(SyncSet *set, int slot)
@@ -146,8 +142,8 @@ Status sync_wait(SyncSet *set, int slot)
                 "Неверный номер семафора", ERROR);
     SOFT_ASSERT(set->handles[slot] != NULL, "Семафор не открыт", ERROR);
 
-    // Ожидание прерывается сигналом: по правилам задания программа должна
-    // корректно переживать Ctrl+C, поэтому повторяем вызов при EINTR.
+    // ожидание прерывается сигналом: по правилам задания программа должна
+    // корректно переживать Ctrl+C, поэтому повторяем вызов при EINTR
     while (sem_wait(set->handles[slot]) == -1) {
         if (errno != EINTR) {
             perror("sem_wait");
@@ -170,9 +166,9 @@ Status sync_post(SyncSet *set, int slot)
     return SUCCESS;
 }
 
-// Приём из примера 04-sem-timewait: sem_timedwait принимает абсолютное
-// время, поэтому берём текущее CLOCK_REALTIME и прибавляем срок.
-// Прерывание обработчиком сигнала даёт EINTR — ожидание перезапускается.
+// приём из примера 04-sem-timewait: sem_timedwait принимает абсолютное
+// время, поэтому берём текущее CLOCK_REALTIME и прибавляем срок
+// прерывание обработчиком сигнала даёт EINTR — ожидание перезапускается
 Status sync_timedwait(SyncSet *set, int slot, int seconds, bool *timed_out)
 {
     SOFT_ASSERT(set != NULL && timed_out != NULL && slot >= 0 && slot < SEM_SLOT_COUNT,
@@ -226,7 +222,7 @@ void sync_close(SyncSet *set)
     if (set == NULL) {
         return;
     }
-    // Безымянные семафоры закрывать нечем: они исчезнут вместе с отображением.
+    // безымянные семафоры закрывать нечем: они исчезнут вместе с отображением
     if (set->mode == SYNC_NAMED) {
         close_named(set, SEM_SLOT_COUNT, false);
     }
@@ -241,7 +237,7 @@ void sync_destroy(SyncSet *set)
         return;
     }
     if (set->mode == SYNC_NAMED) {
-        // sem_close в каждом процессе, sem_unlink — только у создателя.
+        // sem_close в каждом процессе, sem_unlink — только у создателя
         close_named(set, SEM_SLOT_COUNT, set->owner);
     } else if (set->owner) {
         for (int slot = 0; slot < SEM_SLOT_COUNT; ++slot) {

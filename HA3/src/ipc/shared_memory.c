@@ -11,13 +11,13 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-// Общая часть: отображаем уже открытый дескриптор сегмента в адресное
-// пространство процесса и запоминаем параметры для последующей очистки.
+// общая часть: отображаем уже открытый дескриптор сегмента в адресное
+// пространство процесса и запоминаем параметры для последующей очистки
 static Status map_segment(SharedMemory *memory, int descriptor, const char *name,
                           size_t size, bool owner)
 {
     void *address = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, descriptor, 0);
-    // Дескриптор больше не нужен: отображение существует независимо от него.
+    // дескриптор больше не нужен: отображение существует независимо от него
     close(descriptor);
     if (address == MAP_FAILED) {
         perror("mmap");
@@ -41,8 +41,8 @@ Status shared_memory_create(SharedMemory *memory, const char *name, size_t size)
 
     *memory = (SharedMemory){0};
 
-    // O_EXCL показывает, что сегмент уже существует. Это либо мусор после
-    // аварийного завершения прошлого запуска, либо работающая копия программы.
+    // флаг O_EXCL показывает, что сегмент уже существует. Это либо мусор после
+    // аварийного завершения прошлого запуска, либо работающая копия программы
     int descriptor = shm_open(name, O_CREAT | O_EXCL | O_RDWR, 0600);
     if (descriptor == -1 && errno == EEXIST) {
         fprintf(stderr, "Сегмент %s уже существует, удаляю остаток прошлого запуска\n", name);
@@ -57,7 +57,7 @@ Status shared_memory_create(SharedMemory *memory, const char *name, size_t size)
         return ERROR;
     }
 
-    // Задаём размер сегмента: без ftruncate обращение к памяти вызовет SIGBUS.
+    // задаём размер сегмента: без ftruncate обращение к памяти вызовет SIGBUS
     if (ftruncate(descriptor, (off_t)size) == -1) {
         perror("ftruncate");
         close(descriptor);
@@ -77,16 +77,16 @@ Status shared_memory_attach(SharedMemory *memory, const char *name, size_t size)
 
     int descriptor = shm_open(name, O_RDWR, 0600);
     if (descriptor == -1) {
-        // ENOENT значит, что сегмент ещё не создан. Для участника,
+        // ошибка ENOENT значит, что сегмент ещё не создан. Для участника,
         // запущенного раньше управляющей программы, это нормально:
-        // о повторных попытках сообщает вызывающий код.
+        // о повторных попытках сообщает вызывающий код
         if (errno != ENOENT) {
             perror("shm_open");
         }
         return ERROR;
     }
 
-    // Проверяем, что подключаемся к сегменту ожидаемого размера.
+    // проверяем, что подключаемся к сегменту ожидаемого размера
     struct stat info;
     if (fstat(descriptor, &info) == -1) {
         perror("fstat");
@@ -124,8 +124,8 @@ void shared_memory_destroy(SharedMemory *memory)
 
     shared_memory_detach(memory);
 
-    // Имя удаляет только создатель сегмента: после shm_unlink новое
-    // подключение по этому имени невозможно, а уже отображённые копии живут.
+    // имя удаляет только создатель сегмента: после shm_unlink новое
+    // подключение по этому имени невозможно, а уже отображённые копии живут
     if (owner && name[0] != '\0') {
         if (shm_unlink(name) == -1 && errno != ENOENT) {
             perror("shm_unlink");

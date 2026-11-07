@@ -3,14 +3,14 @@
 #include "roles/roles.h"
 #include "components/queue.h"
 
-// Семейство пассажиров станции. Отдельного процесса на каждого пассажира
+// семейство пассажиров станции. Отдельного процесса на каждого пассажира
 // не заводим: по требованию задания сущности с поведением могут быть
 // представлены семействами. Процесс станции отвечает за появление
 // пассажиров и ведение их очередей, а решения о посадке принимает
-// кабина, забирая людей из очередей под семафором SEM_MODEL.
+// кабина, забирая людей из очередей под семафором SEM_MODEL
 
-// Группа пассажиров распределяется между станциями: чётные группы
-// получают остаток на станцию A, нечётные — на станцию B.
+// группа пассажиров распределяется между станциями: чётные группы
+// получают остаток на станцию A, нечётные — на станцию B
 static int station_quota(const SharedModel *model, int station_index)
 {
     int total = model->settings.passengers_per_interval;
@@ -33,7 +33,7 @@ void station_step(SharedModel *model, int station_index)
     if (model->status == SERVICE_FINISHED || model->status == SERVICE_EVACUATING) {
         return;
     }
-    // После закрытия входа новые пассажиры не появляются.
+    // после закрытия входа новые пассажиры не появляются
     if (model->admission_closed) {
         return;
     }
@@ -46,8 +46,8 @@ void station_step(SharedModel *model, int station_index)
     int quota = station_quota(model, station_index);
 
     for (int created = 0; created < quota; ++created) {
-        // Общий предел пассажиров защищён тем же семафором, что и модель,
-        // поэтому обе станции не могут превысить его одновременно.
+        // общий предел пассажиров защищён тем же семафором, что и модель,
+        // поэтому обе станции не могут превысить его одновременно
         if (model->passengers_created >= model->settings.max_passengers) {
             break;
         }
@@ -74,7 +74,7 @@ void station_step(SharedModel *model, int station_index)
         IntQueue *queue = passenger->priority == PRIORITY_VIP ? &station->vip
                                                               : &station->regular;
         if (!queue_push(queue, passenger_id)) {
-            // Очередь переполнена: пассажир не принимается в систему.
+            // очередь переполнена: пассажир не принимается в систему
             passenger->state = PASSENGER_NONE;
             --model->passengers_created;
             --model->next_passenger_id;

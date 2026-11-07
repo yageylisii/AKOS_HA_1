@@ -8,8 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 
-// Линейный конгруэнтный генератор: у каждого участника своё состояние,
-// поэтому порядок планирования процессов не влияет на его поток чисел.
+// генератор псевдослучайных чисел
 unsigned int model_next_random(unsigned int *state)
 {
     if (state == NULL) {
@@ -24,9 +23,7 @@ double model_random_unit(unsigned int *state)
     return (double)model_next_random(state) / 32768.0;
 }
 
-// Проверка настроек целиком, по образцу validate_settings из HA2.
-// Нужна отдельно от вопросов ввода: значения могут прийти
-// из конфигурационного файла, который никто не проверял.
+// проверка настроек целиком
 static Status validate_settings(const Settings *settings)
 {
     SOFT_ASSERT(settings->cabines > 0 && settings->cabines <= MAX_CABINS,
@@ -77,8 +74,8 @@ Status model_init(SharedModel *model, const Settings *settings)
     SOFT_ASSERT(model != NULL && settings != NULL, "Не передана модель", ERROR);
     TRY(validate_settings(settings));
 
-    // Семафоры инициализируются отдельно и не должны быть затёрты здесь,
-    // поэтому обнуляем модель по полям, а не целиком.
+    // семафоры инициализируются отдельно и не должны быть затёрты здесь,
+    // поэтому обнуляем модель по полям, а не целиком
     model->settings = *settings;
     model->cabin_count = settings->cabines;
     model->current_time = 0;
@@ -127,8 +124,8 @@ Status model_init(SharedModel *model, const Settings *settings)
         cabin->on_platform = false;
     }
 
-    // Как в HA1: при запуске на каждой станции занято не более трёх мест,
-    // остальные кабины стоят в резерве вне мест обслуживания.
+    // как в HA1: при запуске на каждой станции занято не более трёх мест,
+    // остальные кабины стоят в резерве вне мест обслуживания
     for (int index = 0; index < model->cabin_count; ++index) {
         Cabin *cabin = &model->cabins[index];
         Station *station = &model->stations[cabin->station_index];
@@ -189,9 +186,9 @@ int model_waiting_passengers(const SharedModel *model, int station_index)
     return station->vip.count + station->regular.count;
 }
 
-// Счётчики статистики уже хранят всё нужное, поэтому перебирать
+// счётчики статистики уже хранят всё нужное, поэтому перебирать
 // массив пассажиров не требуется: приём ровно равен сумме доставленных
-// и эвакуированных, когда в системе никого не осталось.
+// и эвакуированных, когда в системе никого не осталось
 int model_passengers_in_system(const SharedModel *model)
 {
     if (model == NULL) {
@@ -201,7 +198,7 @@ int model_passengers_in_system(const SharedModel *model)
     return statistics->accepted - statistics->delivered - statistics->evacuated;
 }
 
-// Идёт ли сейчас хоть одна операция: движение, посадка или высадка.
+// идёт ли сейчас хоть одна операция: движение, посадка или высадка
 bool model_has_active_operations(const SharedModel *model)
 {
     if (model == NULL) {
@@ -228,8 +225,8 @@ bool model_all_cabins_parked(const SharedModel *model)
     return true;
 }
 
-// Программа завершается после закрытия входа и доставки всех принятых
-// пассажиров, когда все кабины выведены на стоянку.
+// программа завершается после закрытия входа и доставки всех принятых
+// пассажиров, когда все кабины выведены на стоянку
 bool model_is_complete(const SharedModel *model)
 {
     if (model == NULL) {
@@ -293,7 +290,7 @@ void model_evacuate(SharedModel *model)
     model->status = SERVICE_FINISHED;
 }
 
-// Проверка инвариантов задания. Нарушение означает ошибку синхронизации.
+// проверка инвариантов задания. Нарушение означает ошибку синхронизации
 static bool fail_invariant(SharedModel *model, const char *format, ...)
 {
     va_list arguments;
@@ -318,16 +315,16 @@ bool model_check_invariants(SharedModel *model)
     for (int index = 0; index < model->cabin_count; ++index) {
         const Cabin *cabin = &model->cabins[index];
 
-        // Вместимость кабины не превышается.
+        // вместимость кабины не превышается
         if (cabin->passengers < 0 || cabin->passengers > model->settings.capacity) {
             return fail_invariant(model, "кабина %d: пассажиров %d при вместимости %d",
                                   cabin->id, cabin->passengers, model->settings.capacity);
         }
-        // Кабина не отправляется с открытыми дверями.
+        // кабина не отправляется с открытыми дверями
         if (cabin->doors_open && (cabin->state == IN_WALK || cabin->state == WAITING_FOR_STATION)) {
             return fail_invariant(model, "кабина %d движется с открытыми дверями", cabin->id);
         }
-        // Посадка и высадка выполняются только на станции.
+        // посадка и высадка выполняются только на станции
         if ((cabin->state == BOARDING || cabin->state == DROP) && !cabin->on_platform) {
             return fail_invariant(model, "кабина %d выполняет операцию вне станции", cabin->id);
         }
@@ -359,7 +356,7 @@ bool model_check_invariants(SharedModel *model)
         }
     }
 
-    // Пассажир находится либо на станции, либо в одной кабине.
+    // пассажир находится либо на станции, либо в одной кабине
     for (int index = 0; index < model->passengers_created; ++index) {
         const Passenger *passenger = &model->passengers[index];
         bool active = passenger->state == PASSENGER_WAITING ||

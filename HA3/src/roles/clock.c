@@ -11,9 +11,9 @@
 #include <string.h>
 #include <unistd.h>
 
-// Ведущий процесс продвигает модельное время. Он не моделирует
+// ведущий процесс продвигает модельное время. Он не моделирует
 // предметные сущности, а только открывает такт участникам,
-// дожидается их подтверждений и выводит группу событий.
+// дожидается их подтверждений и выводит группу событий
 
 static volatile sig_atomic_t g_signal_received = 0;
 
@@ -29,13 +29,13 @@ void install_signal_handlers(void)
     memset(&action, 0, sizeof(action));
     action.sa_handler = handle_signal;
     sigemptyset(&action.sa_mask);
-    // Без SA_RESTART: прерванный sem_wait вернёт EINTR и мы заметим сигнал.
+    // без SA_RESTART: прерванный sem_wait вернёт EINTR и мы заметим сигнал
     action.sa_flags = 0;
 
-    // SIGINT — Ctrl+C, SIGQUIT — Ctrl+\, SIGTERM — завершение извне.
-    // SIGPIPE добавлен, чтобы обрыв вывода (например, при `| head`)
+    // сигнал SIGINT — Ctrl+C, SIGQUIT — Ctrl+\, SIGTERM — завершение извне
+    // сигнал SIGPIPE добавлен, чтобы обрыв вывода (например, при `| head`)
     // тоже приводил к штатной очистке семафоров и разделяемой памяти,
-    // а не к мгновенной гибели процесса от действия по умолчанию.
+    // а не к мгновенной гибели процесса от действия по умолчанию
     static const int numbers[] = {SIGINT, SIGQUIT, SIGTERM, SIGPIPE};
     for (size_t index = 0; index < sizeof(numbers) / sizeof(numbers[0]); ++index) {
         if (sigaction(numbers[index], &action, NULL) == -1) {
@@ -49,8 +49,8 @@ bool signal_received(void)
     return g_signal_received != 0;
 }
 
-// Сбор подтверждений такта. Ожидание ограничено по времени: если процесс
-// участника сняли извне, ведущий не должен зависнуть на барьере навсегда.
+// сбор подтверждений такта. Ожидание ограничено по времени: если процесс
+// участника сняли извне, ведущий не должен зависнуть на барьере навсегда
 static Status collect_confirmations(ClockContext *context, int count)
 {
     for (int index = 0; index < count; ++index) {
@@ -66,16 +66,16 @@ static Status collect_confirmations(ClockContext *context, int count)
     return SUCCESS;
 }
 
-// Фаза оператора: он решает вопросы остановки и разрешает отправление
-// до того, как кабины начнут свой шаг в этом же такте.
+// фаза оператора: он решает вопросы остановки и разрешает отправление
+// до того, как кабины начнут свой шаг в этом же такте
 static Status run_operator_phase(ClockContext *context)
 {
     TRY(sync_post(context->sync, worker_start_slot(WORKER_OPERATOR, 0)));
     return collect_confirmations(context, 1);
 }
 
-// Фаза кабин и станций. Каждому участнику открывается его персональный
-// семафор, после чего ведущий собирает ровно worker_count подтверждений.
+// фаза кабин и станций. Каждому участнику открывается его персональный
+// семафор, после чего ведущий собирает ровно worker_count подтверждений
 static Status run_worker_phase(ClockContext *context)
 {
     for (int index = 0; index < STATION_COUNT; ++index) {
@@ -97,8 +97,8 @@ Status clock_tick(ClockContext *context)
 
     SharedModel *model = context->model;
 
-    // Между тактами все участники стоят на барьере, поэтому состояние
-    // модели согласовано и его можно проверить и вывести.
+    // между тактами все участники стоят на барьере, поэтому состояние
+    // модели согласовано и его можно проверить и вывести
     TRY(sync_wait(context->sync, SEM_MODEL));
 
     if (!model_check_invariants(model)) {
@@ -106,8 +106,8 @@ Status clock_tick(ClockContext *context)
                   "🛑 Нарушен инвариант модели: %s", model->invariant_message);
     }
 
-    // Решение о завершении принимается до вывода, чтобы все события
-    // одной модельной секунды попали в одну группу журнала.
+    // решение о завершении принимается до вывода, чтобы все события
+    // одной модельной секунды попали в одну группу журнала
     bool interrupted = model->interrupted || signal_received();
     if (interrupted && model->status != SERVICE_FINISHED) {
         model->interrupted = true;
@@ -121,7 +121,7 @@ Status clock_tick(ClockContext *context)
                   "💵 Все принятые пассажиры доставлены, кабины на стоянке");
         model->status = SERVICE_FINISHED;
     } else if (model->current_time > model->settings.work_time + MAX_DRAIN_TIME) {
-        // Защита от бесконечного ожидания при необычном сочетании остановок.
+        // защита от бесконечного ожидания при необычном сочетании остановок
         log_event(&model->log, model->current_time,
                   "🛑 Превышено предельное время завершения работы");
         model_evacuate(model);
@@ -146,8 +146,8 @@ Status clock_shutdown(ClockContext *context)
     context->model->shutdown = true;
     TRY(sync_post(context->sync, SEM_MODEL));
 
-    // Последний такт выпускает всех участников из барьера: они увидят
-    // флаг завершения, подтвердят такт и выйдут из своих циклов.
+    // последний такт выпускает всех участников из барьера: они увидят
+    // флаг завершения, подтвердят такт и выйдут из своих циклов
     TRY(run_operator_phase(context));
     return run_worker_phase(context);
 }
@@ -156,14 +156,14 @@ Status clock_run(ClockContext *context)
 {
     SOFT_ASSERT(context != NULL && context->model != NULL, "Не передан контекст", ERROR);
 
-    // Первое событие попадает в ту же группу, что и прибытия первой минуты.
+    // первое событие попадает в ту же группу, что и прибытия первой минуты
     TRY(sync_wait(context->sync, SEM_MODEL));
     log_event(&context->model->log, context->model->current_time,
               "🧢 Начало работы канатной дороги");
     TRY(sync_post(context->sync, SEM_MODEL));
 
-    // Сбой барьера означает, что участник не отвечает. Моделирование
-    // в этом случае прекращаем, но ресурсы всё равно освобождаем.
+    // сбой барьера означает, что участник не отвечает. Моделирование
+    // в этом случае прекращаем, но ресурсы всё равно освобождаем
     while (context->model->status != SERVICE_FINISHED) {
         if (clock_tick(context) != SUCCESS) {
             context->model->shutdown = true;
