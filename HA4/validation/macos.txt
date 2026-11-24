@@ -1,0 +1,44 @@
+cc -Iinclude -O2 -g -std=gnu11 -Wall -Wextra -Werror -Wformat-security -Wignored-qualifiers -Winit-self -Wswitch-default -Wpointer-arith -Wtype-limits -Wempty-body -Wstrict-prototypes -Wold-style-definition -Wmissing-field-initializers -Wnested-externs -Wmissing-prototypes -Wfloat-equal -Wabsolute-value -MMD -MP -c src/inputs/input_data.c -o build/src/inputs/input_data.o
+cc -Iinclude -O2 -g -std=gnu11 -Wall -Wextra -Werror -Wformat-security -Wignored-qualifiers -Winit-self -Wswitch-default -Wpointer-arith -Wtype-limits -Wempty-body -Wstrict-prototypes -Wold-style-definition -Wmissing-field-initializers -Wnested-externs -Wmissing-prototypes -Wfloat-equal -Wabsolute-value -MMD -MP -c src/roles/server.c -o build/src/roles/server.o
+cc -Iinclude -O2 -g -std=gnu11 -Wall -Wextra -Werror -Wformat-security -Wignored-qualifiers -Winit-self -Wswitch-default -Wpointer-arith -Wtype-limits -Wempty-body -Wstrict-prototypes -Wold-style-definition -Wmissing-field-initializers -Wnested-externs -Wmissing-prototypes -Wfloat-equal -Wabsolute-value -MMD -MP -c app/server_main.c -o build/app/server_main.o
+cc  -o cc_server build/src/components/model.o build/src/components/queue.o build/src/inputs/input_data.o build/src/inputs/input_logs.o build/src/net/protocol.o build/src/net/model_wire.o build/src/net/tcp.o build/src/roles/server.o build/app/server_main.o -lm
+cc  -o cc_operator build/src/components/model.o build/src/components/queue.o build/src/inputs/input_data.o build/src/inputs/input_logs.o build/src/net/protocol.o build/src/net/model_wire.o build/src/net/tcp.o build/src/roles/cabin.o build/src/roles/operator.o build/src/roles/station.o build/src/roles/client.o build/app/operator_main.o -lm
+cc  -o cc_station build/src/components/model.o build/src/components/queue.o build/src/inputs/input_data.o build/src/inputs/input_logs.o build/src/net/protocol.o build/src/net/model_wire.o build/src/net/tcp.o build/src/roles/cabin.o build/src/roles/operator.o build/src/roles/station.o build/src/roles/client.o build/app/station_main.o -lm
+cc  -o cc_cabin build/src/components/model.o build/src/components/queue.o build/src/inputs/input_data.o build/src/inputs/input_logs.o build/src/net/protocol.o build/src/net/model_wire.o build/src/net/tcp.o build/src/roles/cabin.o build/src/roles/operator.o build/src/roles/station.o build/src/roles/client.o build/app/cabin_main.o -lm
+cc  -o cc_observer build/src/components/model.o build/src/components/queue.o build/src/inputs/input_data.o build/src/inputs/input_logs.o build/src/net/protocol.o build/src/net/model_wire.o build/src/net/tcp.o build/src/roles/cabin.o build/src/roles/operator.o build/src/roles/station.o build/src/roles/client.o build/app/observer_main.o -lm
+cc  -o build/tests/model_test build/src/components/model.o build/src/components/queue.o build/src/inputs/input_data.o build/src/inputs/input_logs.o build/src/net/protocol.o build/src/net/model_wire.o build/src/net/tcp.o build/src/roles/cabin.o build/src/roles/operator.o build/src/roles/station.o build/tests/model_test.o -lm
+cc  -o build/tests/protocol_test build/src/components/model.o build/src/components/queue.o build/src/inputs/input_data.o build/src/inputs/input_logs.o build/src/net/protocol.o build/src/net/model_wire.o build/src/net/tcp.o build/src/roles/cabin.o build/src/roles/operator.o build/src/roles/station.o build/tests/protocol_test.o -lm
+build/tests/model_test
+Condition: settings->cabines > 0 && settings->cabines <= MAX_CABINS failed, error: Неверное число кабин
+Condition: settings->capacity > 0 && settings->capacity <= MAX_CABIN_CAPACITY failed, error: Неверная вместимость кабины
+Condition: settings->breakdown_probability >= 0.0 && settings->breakdown_probability <= MAX_BREAKDOWN_PROBABILITY failed, error: Неверная вероятность поломки
+Condition: settings->vip_probability >= 0.0 && settings->vip_probability <= 1.0 failed, error: Неверная доля VIP
+Condition: settings->arrival_interval > 0 && settings->arrival_interval <= MAX_ARRIVAL_INTERVAL failed, error: Неверный интервал прибытия
+Condition: settings->wind[index].start >= 0 && settings->wind[index].end > settings->wind[index].start && settings->wind[index].end <= settings->work_time + MAX_DRAIN_TIME failed, error: Неверный интервал ветра
+Condition: settings->display_delay_ms >= 0 && settings->display_delay_ms <= MAX_DISPLAY_DELAY_MS failed, error: Неверная задержка отображения
+Model tests passed: проверок 94
+build/tests/protocol_test
+Condition: ntohl(body.version) == PROTOCOL_VERSION failed, error: Другая версия протокола
+Condition: ntohl(body.model_size) == model_wire_header_size() failed, error: Клиент собран из других исходников: размер модели не совпадает
+Condition: *role >= 0 && *role < ROLE_COUNT failed, error: Неизвестная роль клиента
+Condition: length == sizeof(HelloBody) failed, error: Неверный размер приветствия
+Condition: queue_is_sane(&station->vip, 1, model->passengers_created) && queue_is_sane(&station->regular, 1, model->passengers_created) && queue_is_sane(&station->waiting_cabins, 0, model->cabin_count - 1) && queue_is_sane(&station->cabins, 0, model->cabin_count - 1) failed, error: Повреждена очередь станции
+Condition: model->cabin_count >= 1 && model->cabin_count <= MAX_CABINS failed, error: Неверное число кабин в модели
+Condition: cabin->passenger_ids[seat] >= 1 && cabin->passenger_ids[seat] <= model->passengers_created failed, error: Неверный пассажир в кабине
+Condition: queue_is_sane(&station->vip, 1, model->passengers_created) && queue_is_sane(&station->regular, 1, model->passengers_created) && queue_is_sane(&station->waiting_cabins, 0, model->cabin_count - 1) && queue_is_sane(&station->cabins, 0, model->cabin_count - 1) failed, error: Повреждена очередь станции
+Condition: ntohl(fields[0]) == PROTOCOL_MAGIC failed, error: Чужие данные в соединении
+Protocol tests passed: проверок 137
+./scripts/test_network.sh
+PASS small: {'accepted': 6, 'delivered': 6, 'evacuated': 0}
+PASS weather-and-breakdowns: {'accepted': 20, 'delivered': 20, 'evacuated': 0}
+PASS stress: {'accepted': 60, 'delivered': 60, 'evacuated': 0}
+PASS reconnect: {'accepted': 6, 'delivered': 6, 'evacuated': 0}
+PASS signal-shutdown: {'accepted': 3, 'delivered': 0, 'evacuated': 3}
+PASS console-shutdown: {'accepted': 3, 'delivered': 0, 'evacuated': 3}
+PASS killed-participant: {'accepted': 6, 'delivered': 6, 'evacuated': 0}
+PASS duplicate-and-partial: {'accepted': 6, 'delivered': 6, 'evacuated': 0}
+PASS reply-timeout: {'accepted': 6, 'delivered': 6, 'evacuated': 0}
+PASS slow-observer: {'accepted': 200, 'delivered': 200, 'evacuated': 0}
+PASS separate-views: {'role_views_only': True}
+PASS invalid-arguments: {'rejected_commands': 4}
+Network tests passed: 12 scenarios

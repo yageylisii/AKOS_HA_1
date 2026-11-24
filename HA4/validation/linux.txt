@@ -1,0 +1,367 @@
+docker build -t akos-ha4-test .
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 298B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.12-slim
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 122B done
+#3 DONE 0.0s
+
+#4 [1/5] FROM docker.io/library/python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b
+#4 resolve docker.io/library/python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 87.43kB done
+#5 DONE 0.0s
+
+#6 [2/5] RUN apt-get update     && apt-get install -y --no-install-recommends gcc make libc6-dev     && rm -rf /var/lib/apt/lists/*
+#6 CACHED
+
+#7 [3/5] WORKDIR /work/HA4
+#7 CACHED
+
+#8 [4/5] COPY . .
+#8 DONE 0.0s
+
+#9 [5/5] RUN make all build/tests/model_test build/tests/protocol_test
+#9 0.064 cc -Iinclude -O2 -g -std=gnu11 -Wall -Wextra -Werror -Wformat-security -Wignored-qualifiers -Winit-self -Wswitch-default -Wpointer-arith -Wtype-limits -Wempty-body -Wstrict-prototypes -Wold-style-definition -Wmissing-field-initializers -Wnested-externs -Wmissing-prototypes -Wfloat-equal -Wold-style-declaration -Wmissing-parameter-type -MMD -MP -c src/components/model.c -o build/src/components/model.o
+#9 0.168 cc -Iinclude -O2 -g -std=gnu11 -Wall -Wextra -Werror -Wformat-security -Wignored-qualifiers -Winit-self -Wswitch-default -Wpointer-arith -Wtype-limits -Wempty-body -Wstrict-prototypes -Wold-style-definition -Wmissing-field-initializers -Wnested-externs -Wmissing-prototypes -Wfloat-equal -Wold-style-declaration -Wmissing-parameter-type -MMD -MP -c src/components/queue.c -o build/src/components/queue.o
+#9 0.186 cc -Iinclude -O2 -g -std=gnu11 -Wall -Wextra -Werror -Wformat-security -Wignored-qualifiers -Winit-self -Wswitch-default -Wpointer-arith -Wtype-limits -Wempty-body -Wstrict-prototypes -Wold-style-definition -Wmissing-field-initializers -Wnested-externs -Wmissing-prototypes -Wfloat-equal -Wold-style-declaration -Wmissing-parameter-type -MMD -MP -c src/inputs/input_data.c -o build/src/inputs/input_data.o
+#9 0.253 cc -Iinclude -O2 -g -std=gnu11 -Wall -Wextra -Werror -Wformat-security -Wignored-qualifiers -Winit-self -Wswitch-default -Wpointer-arith -Wtype-limits -Wempty-body -Wstrict-prototypes -Wold-style-definition -Wmissing-field-initializers -Wnested-externs -Wmissing-prototypes -Wfloat-equal -Wold-style-declaration -Wmissing-parameter-type -MMD -MP -c src/inputs/input_logs.c -o build/src/inputs/input_logs.o
+#9 0.288 cc -Iinclude -O2 -g -std=gnu11 -Wall -Wextra -Werror -Wformat-security -Wignored-qualifiers -Winit-self -Wswitch-default -Wpointer-arith -Wtype-limits -Wempty-body -Wstrict-prototypes -Wold-style-definition -Wmissing-field-initializers -Wnested-externs -Wmissing-prototypes -Wfloat-equal -Wold-style-declaration -Wmissing-parameter-type -MMD -MP -c src/net/protocol.c -o build/src/net/protocol.o
+#9 0.333 cc -Iinclude -O2 -g -std=gnu11 -Wall -Wextra -Werror -Wformat-security -Wignored-qualifiers -Winit-self -Wswitch-default -Wpointer-arith -Wtype-limits -Wempty-body -Wstrict-prototypes -Wold-style-definition -Wmissing-field-initializers -Wnested-externs -Wmissing-prototypes -Wfloat-equal -Wold-style-declaration -Wmissing-parameter-type -MMD -MP -c src/net/model_wire.c -o build/src/net/model_wire.o
+#9 0.402 cc -Iinclude -O2 -g -std=gnu11 -Wall -Wextra -Werror -Wformat-security -Wignored-qualifiers -Winit-self -Wswitch-default -Wpointer-arith -Wtype-limits -Wempty-body -Wstrict-prototypes -Wold-style-definition -Wmissing-field-initializers -Wnested-externs -Wmissing-prototypes -Wfloat-equal -Wold-style-declaration -Wmissing-parameter-type -MMD -MP -c src/net/tcp.c -o build/src/net/tcp.o
+#9 0.436 cc -Iinclude -O2 -g -std=gnu11 -Wall -Wextra -Werror -Wformat-security -Wignored-qualifiers -Winit-self -Wswitch-default -Wpointer-arith -Wtype-limits -Wempty-body -Wstrict-prototypes -Wold-style-definition -Wmissing-field-initializers -Wnested-externs -Wmissing-prototypes -Wfloat-equal -Wold-style-declaration -Wmissing-parameter-type -MMD -MP -c src/roles/server.c -o build/src/roles/server.o
+#9 0.609 cc -Iinclude -O2 -g -std=gnu11 -Wall -Wextra -Werror -Wformat-security -Wignored-qualifiers -Winit-self -Wswitch-default -Wpointer-arith -Wtype-limits -Wempty-body -Wstrict-prototypes -Wold-style-definition -Wmissing-field-initializers -Wnested-externs -Wmissing-prototypes -Wfloat-equal -Wold-style-declaration -Wmissing-parameter-type -MMD -MP -c app/server_main.c -o build/app/server_main.o
+#9 0.622 cc  -o cc_server build/src/components/model.o build/src/components/queue.o build/src/inputs/input_data.o build/src/inputs/input_logs.o build/src/net/protocol.o build/src/net/model_wire.o build/src/net/tcp.o build/src/roles/server.o build/app/server_main.o -lm
+#9 0.632 cc -Iinclude -O2 -g -std=gnu11 -Wall -Wextra -Werror -Wformat-security -Wignored-qualifiers -Winit-self -Wswitch-default -Wpointer-arith -Wtype-limits -Wempty-body -Wstrict-prototypes -Wold-style-definition -Wmissing-field-initializers -Wnested-externs -Wmissing-prototypes -Wfloat-equal -Wold-style-declaration -Wmissing-parameter-type -MMD -MP -c src/roles/cabin.c -o build/src/roles/cabin.o
+#9 0.676 cc -Iinclude -O2 -g -std=gnu11 -Wall -Wextra -Werror -Wformat-security -Wignored-qualifiers -Winit-self -Wswitch-default -Wpointer-arith -Wtype-limits -Wempty-body -Wstrict-prototypes -Wold-style-definition -Wmissing-field-initializers -Wnested-externs -Wmissing-prototypes -Wfloat-equal -Wold-style-declaration -Wmissing-parameter-type -MMD -MP -c src/roles/operator.c -o build/src/roles/operator.o
+#9 0.694 cc -Iinclude -O2 -g -std=gnu11 -Wall -Wextra -Werror -Wformat-security -Wignored-qualifiers -Winit-self -Wswitch-default -Wpointer-arith -Wtype-limits -Wempty-body -Wstrict-prototypes -Wold-style-definition -Wmissing-field-initializers -Wnested-externs -Wmissing-prototypes -Wfloat-equal -Wold-style-declaration -Wmissing-parameter-type -MMD -MP -c src/roles/station.c -o build/src/roles/station.o
+#9 0.711 cc -Iinclude -O2 -g -std=gnu11 -Wall -Wextra -Werror -Wformat-security -Wignored-qualifiers -Winit-self -Wswitch-default -Wpointer-arith -Wtype-limits -Wempty-body -Wstrict-prototypes -Wold-style-definition -Wmissing-field-initializers -Wnested-externs -Wmissing-prototypes -Wfloat-equal -Wold-style-declaration -Wmissing-parameter-type -MMD -MP -c src/roles/client.c -o build/src/roles/client.o
+#9 0.773 cc -Iinclude -O2 -g -std=gnu11 -Wall -Wextra -Werror -Wformat-security -Wignored-qualifiers -Winit-self -Wswitch-default -Wpointer-arith -Wtype-limits -Wempty-body -Wstrict-prototypes -Wold-style-definition -Wmissing-field-initializers -Wnested-externs -Wmissing-prototypes -Wfloat-equal -Wold-style-declaration -Wmissing-parameter-type -MMD -MP -c app/operator_main.c -o build/app/operator_main.o
+#9 0.782 cc  -o cc_operator build/src/components/model.o build/src/components/queue.o build/src/inputs/input_data.o build/src/inputs/input_logs.o build/src/net/protocol.o build/src/net/model_wire.o build/src/net/tcp.o build/src/roles/cabin.o build/src/roles/operator.o build/src/roles/station.o build/src/roles/client.o build/app/operator_main.o -lm
+#9 0.793 cc -Iinclude -O2 -g -std=gnu11 -Wall -Wextra -Werror -Wformat-security -Wignored-qualifiers -Winit-self -Wswitch-default -Wpointer-arith -Wtype-limits -Wempty-body -Wstrict-prototypes -Wold-style-definition -Wmissing-field-initializers -Wnested-externs -Wmissing-prototypes -Wfloat-equal -Wold-style-declaration -Wmissing-parameter-type -MMD -MP -c app/station_main.c -o build/app/station_main.o
+#9 0.802 cc  -o cc_station build/src/components/model.o build/src/components/queue.o build/src/inputs/input_data.o build/src/inputs/input_logs.o build/src/net/protocol.o build/src/net/model_wire.o build/src/net/tcp.o build/src/roles/cabin.o build/src/roles/operator.o build/src/roles/station.o build/src/roles/client.o build/app/station_main.o -lm
+#9 0.812 cc -Iinclude -O2 -g -std=gnu11 -Wall -Wextra -Werror -Wformat-security -Wignored-qualifiers -Winit-self -Wswitch-default -Wpointer-arith -Wtype-limits -Wempty-body -Wstrict-prototypes -Wold-style-definition -Wmissing-field-initializers -Wnested-externs -Wmissing-prototypes -Wfloat-equal -Wold-style-declaration -Wmissing-parameter-type -MMD -MP -c app/cabin_main.c -o build/app/cabin_main.o
+#9 0.821 cc  -o cc_cabin build/src/components/model.o build/src/components/queue.o build/src/inputs/input_data.o build/src/inputs/input_logs.o build/src/net/protocol.o build/src/net/model_wire.o build/src/net/tcp.o build/src/roles/cabin.o build/src/roles/operator.o build/src/roles/station.o build/src/roles/client.o build/app/cabin_main.o -lm
+#9 0.831 cc -Iinclude -O2 -g -std=gnu11 -Wall -Wextra -Werror -Wformat-security -Wignored-qualifiers -Winit-self -Wswitch-default -Wpointer-arith -Wtype-limits -Wempty-body -Wstrict-prototypes -Wold-style-definition -Wmissing-field-initializers -Wnested-externs -Wmissing-prototypes -Wfloat-equal -Wold-style-declaration -Wmissing-parameter-type -MMD -MP -c app/observer_main.c -o build/app/observer_main.o
+#9 0.840 cc  -o cc_observer build/src/components/model.o build/src/components/queue.o build/src/inputs/input_data.o build/src/inputs/input_logs.o build/src/net/protocol.o build/src/net/model_wire.o build/src/net/tcp.o build/src/roles/cabin.o build/src/roles/operator.o build/src/roles/station.o build/src/roles/client.o build/app/observer_main.o -lm
+#9 0.850 cc -Iinclude -O2 -g -std=gnu11 -Wall -Wextra -Werror -Wformat-security -Wignored-qualifiers -Winit-self -Wswitch-default -Wpointer-arith -Wtype-limits -Wempty-body -Wstrict-prototypes -Wold-style-definition -Wmissing-field-initializers -Wnested-externs -Wmissing-prototypes -Wfloat-equal -Wold-style-declaration -Wmissing-parameter-type -MMD -MP -c tests/model_test.c -o build/tests/model_test.o
+#9 0.949 cc  -o build/tests/model_test build/src/components/model.o build/src/components/queue.o build/src/inputs/input_data.o build/src/inputs/input_logs.o build/src/net/protocol.o build/src/net/model_wire.o build/src/net/tcp.o build/src/roles/cabin.o build/src/roles/operator.o build/src/roles/station.o build/tests/model_test.o -lm
+#9 0.960 cc -Iinclude -O2 -g -std=gnu11 -Wall -Wextra -Werror -Wformat-security -Wignored-qualifiers -Winit-self -Wswitch-default -Wpointer-arith -Wtype-limits -Wempty-body -Wstrict-prototypes -Wold-style-definition -Wmissing-field-initializers -Wnested-externs -Wmissing-prototypes -Wfloat-equal -Wold-style-declaration -Wmissing-parameter-type -MMD -MP -c tests/protocol_test.c -o build/tests/protocol_test.o
+#9 1.036 cc  -o build/tests/protocol_test build/src/components/model.o build/src/components/queue.o build/src/inputs/input_data.o build/src/inputs/input_logs.o build/src/net/protocol.o build/src/net/model_wire.o build/src/net/tcp.o build/src/roles/cabin.o build/src/roles/operator.o build/src/roles/station.o build/tests/protocol_test.o -lm
+#9 DONE 1.1s
+
+#10 exporting to image
+#10 exporting layers 0.1s done
+#10 exporting manifest sha256:b564ef12c3227dc752acdbaf49400f4c420f87b92958e15ee53663152e61b029 done
+#10 exporting config sha256:9da79df5918aa19e5243aa27dd9b024062053125694224ff4f60a98f6f10f6ef done
+#10 exporting attestation manifest sha256:6e300cf6260ada41ca3b3e9b6e65e85a13b6e8018557c1441af9078b41631049 done
+#10 exporting manifest list sha256:9c24b15387fecef44544ae4a7f9a00bc4f1fa204c7b8675611d1aa7ec271d723 done
+#10 naming to docker.io/library/akos-ha4-test:latest done
+#10 unpacking to docker.io/library/akos-ha4-test:latest 0.0s done
+#10 DONE 0.1s
+docker run --rm akos-ha4-test
+build/tests/model_test
+Condition: settings->cabines > 0 && settings->cabines <= MAX_CABINS failed, error: Неверное число кабин
+Condition: settings->capacity > 0 && settings->capacity <= MAX_CABIN_CAPACITY failed, error: Неверная вместимость кабины
+Condition: settings->breakdown_probability >= 0.0 && settings->breakdown_probability <= MAX_BREAKDOWN_PROBABILITY failed, error: Неверная вероятность поломки
+Condition: settings->vip_probability >= 0.0 && settings->vip_probability <= 1.0 failed, error: Неверная доля VIP
+Condition: settings->arrival_interval > 0 && settings->arrival_interval <= MAX_ARRIVAL_INTERVAL failed, error: Неверный интервал прибытия
+Condition: settings->wind[index].start >= 0 && settings->wind[index].end > settings->wind[index].start && settings->wind[index].end <= settings->work_time + MAX_DRAIN_TIME failed, error: Неверный интервал ветра
+Condition: settings->display_delay_ms >= 0 && settings->display_delay_ms <= MAX_DISPLAY_DELAY_MS failed, error: Неверная задержка отображения
+build/tests/protocol_test
+Model tests passed: проверок 94
+Condition: ntohl(body.version) == PROTOCOL_VERSION failed, error: Другая версия протокола
+Condition: ntohl(body.model_size) == model_wire_header_size() failed, error: Клиент собран из других исходников: размер модели не совпадает
+Condition: *role >= 0 && *role < ROLE_COUNT failed, error: Неизвестная роль клиента
+Condition: length == sizeof(HelloBody) failed, error: Неверный размер приветствия
+Condition: queue_is_sane(&station->vip, 1, model->passengers_created) && queue_is_sane(&station->regular, 1, model->passengers_created) && queue_is_sane(&station->waiting_cabins, 0, model->cabin_count - 1) && queue_is_sane(&station->cabins, 0, model->cabin_count - 1) failed, error: Повреждена очередь станции
+Condition: model->cabin_count >= 1 && model->cabin_count <= MAX_CABINS failed, error: Неверное число кабин в модели
+Condition: cabin->passenger_ids[seat] >= 1 && cabin->passenger_ids[seat] <= model->passengers_created failed, error: Неверный пассажир в кабине
+Condition: queue_is_sane(&station->vip, 1, model->passengers_created) && queue_is_sane(&station->regular, 1, model->passengers_created) && queue_is_sane(&station->waiting_cabins, 0, model->cabin_count - 1) && queue_is_sane(&station->cabins, 0, model->cabin_count - 1) failed, error: Повреждена очередь станции
+Condition: ntohl(fields[0]) == PROTOCOL_MAGIC failed, error: Чужие данные в соединении
+Protocol tests passed: проверок 137
+./scripts/test_network.sh
+PASS small: {'accepted': 6, 'delivered': 6, 'evacuated': 0}
+PASS weather-and-breakdowns: {'accepted': 20, 'delivered': 20, 'evacuated': 0}
+PASS stress: {'accepted': 60, 'delivered': 60, 'evacuated': 0}
+PASS reconnect: {'accepted': 6, 'delivered': 6, 'evacuated': 0}
+PASS signal-shutdown: {'accepted': 3, 'delivered': 0, 'evacuated': 3}
+PASS console-shutdown: {'accepted': 3, 'delivered': 0, 'evacuated': 3}
+PASS killed-participant: {'accepted': 6, 'delivered': 6, 'evacuated': 0}
+PASS duplicate-and-partial: {'accepted': 6, 'delivered': 6, 'evacuated': 0}
+PASS reply-timeout: {'accepted': 6, 'delivered': 6, 'evacuated': 0}
+PASS slow-observer: {'accepted': 200, 'delivered': 200, 'evacuated': 0}
+PASS separate-views: {'role_views_only': True}
+PASS invalid-arguments: {'rejected_commands': 4}
+Network tests passed: 12 scenarios
+docker build -t akos-ha4-test .
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 DONE 0.0s
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 298B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.12-slim
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 122B done
+#3 DONE 0.0s
+
+#4 [1/5] FROM docker.io/library/python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b
+#4 resolve docker.io/library/python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 2.50kB done
+#5 DONE 0.0s
+
+#6 [3/5] WORKDIR /work/HA4
+#6 CACHED
+
+#7 [4/5] COPY . .
+#7 CACHED
+
+#8 [2/5] RUN apt-get update     && apt-get install -y --no-install-recommends gcc make libc6-dev     && rm -rf /var/lib/apt/lists/*
+#8 CACHED
+
+#9 [5/5] RUN make all build/tests/model_test build/tests/protocol_test
+#9 CACHED
+
+#10 exporting to image
+#10 exporting layers done
+#10 exporting manifest sha256:b564ef12c3227dc752acdbaf49400f4c420f87b92958e15ee53663152e61b029 done
+#10 exporting config sha256:9da79df5918aa19e5243aa27dd9b024062053125694224ff4f60a98f6f10f6ef done
+#10 exporting attestation manifest sha256:96212a78731a8175c36de7539c497832ebb5f41d3173cb275a7b54bd0c7e65d5 done
+#10 exporting manifest list sha256:e384c7f074d92987b757aa1f76a7e62d53802e63af6a870d6364435ad55c1a51 done
+#10 naming to docker.io/library/akos-ha4-test:latest done
+#10 unpacking to docker.io/library/akos-ha4-test:latest done
+#10 DONE 0.0s
+./scripts/test_distributed.sh
+✅ наблюдатель 1 подключён к akos-ha4-52317-server:4546; Ctrl+C — отключиться без остановки системы
+[сервер] 👀 вы подключены к канатной дороге как наблюдатель 1, модельное время 09:00:00, режим: ожидание участников
+  ┌─ состояние на 09:00:00: ожидание участников
+  │ станция A: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ станция B: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ кабина 1: посадка у станции A, пассажиров 0/4, двери открыты
+  │ кабина 2: посадка у станции B, пассажиров 0/4, двери открыты
+  └─ принято 0, доставлено 0, в системе 0, рейсов 0, отказов 0
+[сервер] 🔌 подключился кабина 1
+[сервер] 🔌 подключился кабина 2
+[сервер] ▶ все участники подключены, моделирование начинается
+[09:00:00]
+  🧢 Начало работы канатной дороги
+  🧍 Пассажир 1 прибыл на станцию A (обычный), едет на станцию B
+  🧍 Пассажир 2 прибыл на станцию A (VIP), едет на станцию B
+  🧍 Пассажир 3 прибыл на станцию B (VIP), едет на станцию A
+  📥 Пассажир 2 начал посадку в кабину 1 на станции A (VIP)
+  📥 Пассажир 3 начал посадку в кабину 2 на станции B (VIP)
+  ┌─ состояние на 09:00:00: движение
+  │ станция A: ждут VIP 0, обычных 1; мест занято 1 из 3
+  │ станция B: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ кабина 1: посадка у станции A, пассажиров 0/4, двери открыты
+  │ кабина 2: посадка у станции B, пассажиров 0/4, двери открыты
+  └─ принято 3, доставлено 0, в системе 3, рейсов 0, отказов 0
+[09:00:02]
+  📥 Пассажир 2 сел в кабину 1 (занято 1 из 4)
+  📥 Пассажир 1 начал посадку в кабину 1 на станции A (обычный)
+  📥 Пассажир 3 сел в кабину 2 (занято 1 из 4)
+  🟦 Кабина 2 закрыла двери на станции B, пассажиров 1
+  ┌─ состояние на 09:00:02: движение
+  │ станция A: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ станция B: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ кабина 1: посадка у станции A, пассажиров 1/4, двери открыты
+  │ кабина 2: ждёт отправления у станции B, пассажиров 1/4, двери закрыты
+  └─ принято 3, доставлено 0, в системе 3, рейсов 0, отказов 0
+[09:00:03]
+  📣 Оператор разрешил отправление кабины 2 со станции B
+  🚠 Кабина 2 отправилась со станции B на станцию A, пассажиров 1
+  ┌─ состояние на 09:00:03: движение
+  │ станция A: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ станция B: ждут VIP 0, обычных 0; мест занято 0 из 3
+  │ кабина 1: посадка у станции A, пассажиров 1/4, двери открыты
+  │ кабина 2: в пути B→A, осталось 20 с, пассажиров 1/4
+  └─ принято 3, доставлено 0, в системе 3, рейсов 1, отказов 0
+[09:00:04]
+  📥 Пассажир 1 сел в кабину 1 (занято 2 из 4)
+  🟦 Кабина 1 закрыла двери на станции A, пассажиров 2
+  ┌─ состояние на 09:00:04: движение
+  │ станция A: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ станция B: ждут VIP 0, обычных 0; мест занято 0 из 3
+  │ кабина 1: ждёт отправления у станции A, пассажиров 2/4, двери закрыты
+  │ кабина 2: в пути B→A, осталось 19 с, пассажиров 1/4
+  └─ принято 3, доставлено 0, в системе 3, рейсов 1, отказов 0
+[09:00:05]
+  📣 Оператор разрешил отправление кабины 1 со станции A
+  🚠 Кабина 1 отправилась со станции A на станцию B, пассажиров 2
+  ┌─ состояние на 09:00:05: движение
+  │ станция A: ждут VIP 0, обычных 0; мест занято 0 из 3
+  │ станция B: ждут VIP 0, обычных 0; мест занято 0 из 3
+  │ кабина 1: в пути A→B, осталось 20 с, пассажиров 2/4
+  │ кабина 2: в пути B→A, осталось 18 с, пассажиров 1/4
+  └─ принято 3, доставлено 0, в системе 3, рейсов 2, отказов 0
+[09:00:23]
+  🚠 Кабина 2 завершила путь и подошла к станции A
+  ✅ Кабина 2 допущена на станцию A, двери открыты
+  ┌─ состояние на 09:00:23: движение
+  │ станция A: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ станция B: ждут VIP 0, обычных 0; мест занято 0 из 3
+  │ кабина 1: в пути A→B, осталось 2 с, пассажиров 2/4
+  │ кабина 2: высадка у станции A, пассажиров 1/4, двери открыты
+  └─ принято 3, доставлено 0, в системе 3, рейсов 2, отказов 0
+[09:00:25]
+  🚠 Кабина 1 завершила путь и подошла к станции B
+  ✅ Кабина 1 допущена на станцию B, двери открыты
+  📤 Пассажир 3 вышел из кабины 2 и доставлен на станцию A
+  ┌─ состояние на 09:00:25: движение
+  │ станция A: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ станция B: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ кабина 1: высадка у станции B, пассажиров 2/4, двери открыты
+  │ кабина 2: посадка у станции A, пассажиров 0/4, двери открыты
+  └─ принято 3, доставлено 1, в системе 2, рейсов 2, отказов 0
+[09:00:27]
+  📤 Пассажир 2 вышел из кабины 1 и доставлен на станцию B
+  ┌─ состояние на 09:00:27: движение
+  │ станция A: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ станция B: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ кабина 1: высадка у станции B, пассажиров 1/4, двери открыты
+  │ кабина 2: посадка у станции A, пассажиров 0/4, двери открыты
+  └─ принято 3, доставлено 2, в системе 1, рейсов 2, отказов 0
+[09:00:29]
+  📤 Пассажир 1 вышел из кабины 1 и доставлен на станцию B
+  ┌─ состояние на 09:00:29: движение
+  │ станция A: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ станция B: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ кабина 1: посадка у станции B, пассажиров 0/4, двери открыты
+  │ кабина 2: посадка у станции A, пассажиров 0/4, двери открыты
+  └─ принято 3, доставлено 3, в системе 0, рейсов 2, отказов 0
+[09:00:30]
+  🧍 Пассажир 4 прибыл на станцию A (обычный), едет на станцию B
+  🧍 Пассажир 5 прибыл на станцию B (обычный), едет на станцию A
+  🧍 Пассажир 6 прибыл на станцию B (VIP), едет на станцию A
+  📥 Пассажир 6 начал посадку в кабину 1 на станции B (VIP)
+  📥 Пассажир 4 начал посадку в кабину 2 на станции A (обычный)
+  ┌─ состояние на 09:00:30: движение
+  │ станция A: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ станция B: ждут VIP 0, обычных 1; мест занято 1 из 3
+  │ кабина 1: посадка у станции B, пассажиров 0/4, двери открыты
+  │ кабина 2: посадка у станции A, пассажиров 0/4, двери открыты
+  └─ принято 6, доставлено 3, в системе 3, рейсов 2, отказов 0
+[09:00:32]
+  📥 Пассажир 6 сел в кабину 1 (занято 1 из 4)
+  📥 Пассажир 5 начал посадку в кабину 1 на станции B (обычный)
+  📥 Пассажир 4 сел в кабину 2 (занято 1 из 4)
+  🟦 Кабина 2 закрыла двери на станции A, пассажиров 1
+  ┌─ состояние на 09:00:32: движение
+  │ станция A: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ станция B: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ кабина 1: посадка у станции B, пассажиров 1/4, двери открыты
+  │ кабина 2: ждёт отправления у станции A, пассажиров 1/4, двери закрыты
+  └─ принято 6, доставлено 3, в системе 3, рейсов 2, отказов 0
+[09:00:33]
+  📣 Оператор разрешил отправление кабины 2 со станции A
+  🚠 Кабина 2 отправилась со станции A на станцию B, пассажиров 1
+  ┌─ состояние на 09:00:33: движение
+  │ станция A: ждут VIP 0, обычных 0; мест занято 0 из 3
+  │ станция B: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ кабина 1: посадка у станции B, пассажиров 1/4, двери открыты
+  │ кабина 2: в пути A→B, осталось 20 с, пассажиров 1/4
+  └─ принято 6, доставлено 3, в системе 3, рейсов 3, отказов 0
+[09:00:34]
+  📥 Пассажир 5 сел в кабину 1 (занято 2 из 4)
+  🟦 Кабина 1 закрыла двери на станции B, пассажиров 2
+  ┌─ состояние на 09:00:34: движение
+  │ станция A: ждут VIP 0, обычных 0; мест занято 0 из 3
+  │ станция B: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ кабина 1: ждёт отправления у станции B, пассажиров 2/4, двери закрыты
+  │ кабина 2: в пути A→B, осталось 19 с, пассажиров 1/4
+  └─ принято 6, доставлено 3, в системе 3, рейсов 3, отказов 0
+[09:00:35]
+  📣 Оператор разрешил отправление кабины 1 со станции B
+  🚠 Кабина 1 отправилась со станции B на станцию A, пассажиров 2
+  ┌─ состояние на 09:00:35: движение
+  │ станция A: ждут VIP 0, обычных 0; мест занято 0 из 3
+  │ станция B: ждут VIP 0, обычных 0; мест занято 0 из 3
+  │ кабина 1: в пути B→A, осталось 20 с, пассажиров 2/4
+  │ кабина 2: в пути A→B, осталось 18 с, пассажиров 1/4
+  └─ принято 6, доставлено 3, в системе 3, рейсов 4, отказов 0
+[09:00:53]
+  🚠 Кабина 2 завершила путь и подошла к станции B
+  ✅ Кабина 2 допущена на станцию B, двери открыты
+  ┌─ состояние на 09:00:53: движение
+  │ станция A: ждут VIP 0, обычных 0; мест занято 0 из 3
+  │ станция B: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ кабина 1: в пути B→A, осталось 2 с, пассажиров 2/4
+  │ кабина 2: высадка у станции B, пассажиров 1/4, двери открыты
+  └─ принято 6, доставлено 3, в системе 3, рейсов 4, отказов 0
+[09:00:55]
+  🚠 Кабина 1 завершила путь и подошла к станции A
+  ✅ Кабина 1 допущена на станцию A, двери открыты
+  📤 Пассажир 4 вышел из кабины 2 и доставлен на станцию B
+  ┌─ состояние на 09:00:55: движение
+  │ станция A: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ станция B: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ кабина 1: высадка у станции A, пассажиров 2/4, двери открыты
+  │ кабина 2: посадка у станции B, пассажиров 0/4, двери открыты
+  └─ принято 6, доставлено 4, в системе 2, рейсов 4, отказов 0
+[09:00:57]
+  📤 Пассажир 6 вышел из кабины 1 и доставлен на станцию A
+  ┌─ состояние на 09:00:57: движение
+  │ станция A: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ станция B: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ кабина 1: высадка у станции A, пассажиров 1/4, двери открыты
+  │ кабина 2: посадка у станции B, пассажиров 0/4, двери открыты
+  └─ принято 6, доставлено 5, в системе 1, рейсов 4, отказов 0
+[09:00:59]
+  📤 Пассажир 5 вышел из кабины 1 и доставлен на станцию A
+  ┌─ состояние на 09:00:59: движение
+  │ станция A: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ станция B: ждут VIP 0, обычных 0; мест занято 1 из 3
+  │ кабина 1: посадка у станции A, пассажиров 0/4, двери открыты
+  │ кабина 2: посадка у станции B, пассажиров 0/4, двери открыты
+  └─ принято 6, доставлено 6, в системе 0, рейсов 4, отказов 0
+[09:01:00]
+  🛑 Оператор: вход закрыт, принятые пассажиры будут доставлены
+  🅿️ Кабина 1 выведена на стоянку у станции A
+  🅿️ Кабина 2 выведена на стоянку у станции B
+  💵 Все принятые пассажиры доставлены, кабины на стоянке
+  ┌─ состояние на 09:01:00: работа завершена
+  │ станция A: ждут VIP 0, обычных 0; мест занято 0 из 3
+  │ станция B: ждут VIP 0, обычных 0; мест занято 0 из 3
+  │ кабина 1: на стоянке у станции A, пассажиров 0/4, двери закрыты
+  │ кабина 2: на стоянке у станции B, пассажиров 0/4, двери закрыты
+  └─ принято 6, доставлено 6, в системе 0, рейсов 4, отказов 0
+  ┌─ состояние на 09:01:00: работа завершена
+  │ станция A: ждут VIP 0, обычных 0; мест занято 0 из 3
+  │ станция B: ждут VIP 0, обычных 0; мест занято 0 из 3
+  │ кабина 1: на стоянке у станции A, пассажиров 0/4, двери закрыты
+  │ кабина 2: на стоянке у станции B, пассажиров 0/4, двери закрыты
+  └─ принято 6, доставлено 6, в системе 0, рейсов 4, отказов 0
+[сервер] ✅ Работа канатной дороги завершена штатно
+
+=== Итоги работы канатной дороги ===
+Модельное время завершения: 09:01:00
+Принято пассажиров:         6
+Доставлено пассажиров:      6
+Эвакуировано пассажиров:    0
+Отказов из-за заполнения:   0
+Выполнено рейсов:           4
+Технических остановок:      0
+Остановок из-за ветра:      0
+Среднее время в системе:    27 с
+Начальное значение ГСЧ:     12345
+Инварианты модели:          нарушений не обнаружено
+👋 сервер завершил работу, клиент закрывается
+
+Distributed clients passed: all clients received shutdown and exited

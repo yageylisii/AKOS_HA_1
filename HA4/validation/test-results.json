@@ -1,0 +1,58 @@
+{
+  "small": {
+    "accepted": 6,
+    "delivered": 6,
+    "evacuated": 0
+  },
+  "weather-and-breakdowns": {
+    "accepted": 20,
+    "delivered": 20,
+    "evacuated": 0
+  },
+  "stress": {
+    "accepted": 60,
+    "delivered": 60,
+    "evacuated": 0
+  },
+  "reconnect": {
+    "accepted": 6,
+    "delivered": 6,
+    "evacuated": 0
+  },
+  "signal-shutdown": {
+    "accepted": 3,
+    "delivered": 0,
+    "evacuated": 3
+  },
+  "console-shutdown": {
+    "accepted": 3,
+    "delivered": 0,
+    "evacuated": 3
+  },
+  "killed-participant": {
+    "accepted": 6,
+    "delivered": 6,
+    "evacuated": 0
+  },
+  "duplicate-and-partial": {
+    "accepted": 6,
+    "delivered": 6,
+    "evacuated": 0
+  },
+  "reply-timeout": {
+    "accepted": 6,
+    "delivered": 6,
+    "evacuated": 0
+  },
+  "slow-observer": {
+    "accepted": 200,
+    "delivered": 200,
+    "evacuated": 0
+  },
+  "separate-views": {
+    "role_views_only": true
+  },
+  "invalid-arguments": {
+    "rejected_commands": 4
+  }
+}
