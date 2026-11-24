@@ -1,0 +1,12 @@
+build/
+cable_car_unnamed
+cable_car_named
+cc_control
+cc_operator
+cc_cabin
+cc_station
+log.txt
+log_unnamed.txt
+log_named.txt
+log_standalone.txt
+workers.log

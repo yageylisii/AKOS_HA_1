@@ -1,0 +1,9 @@
+build
+cc_server
+cc_operator
+cc_station
+cc_cabin
+cc_observer
+logs
+.git
+__pycache__
